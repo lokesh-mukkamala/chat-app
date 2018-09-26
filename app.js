@@ -183,10 +183,10 @@ app.use('/users', users);
 
 //mySQL connection
 var db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'lokesh',
-  database: 'chat_application'
+  host: 'ec2-174-129-35-61.compute-1.amazonaws.com',
+  user: 'jhokofacydijjy',
+  password: 'e1d0ebe0a8d4be153f19591579631edfb144699a20792275c3dccf264e6c7b41',
+  database: 'd2s425j40cbvq'
 });
 
 // db.query("CREATE DATABASE IF NOT EXISTS chat_application");
