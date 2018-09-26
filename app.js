@@ -189,7 +189,7 @@ var db = mysql.createConnection({
   database: 'chat_application'
 });
 
-// db.query("CREATE DATABASE IF NOT EXISTS chat_application");
+db.query("CREATE DATABASE IF NOT EXISTS chat_application");
 db.query("CREATE TABLE IF NOT EXISTS register (fname text NOT NULL,lname text NOT NULL,image varchar(255) NULL,phno varchar(20) NOT NULL,uname varchar(20) NOT NULL,pswd varchar(15) NOT NULL,PRIMARY KEY (uname),onlineindication varchar(20) NULL, email varchar(40) NOT NULL, lastseen longtext NULL);");
 db.query("CREATE TABLE IF NOT EXISTS messages (me_user varchar(20) NOT NULL, me_fname varchar(20) NOT NULL, me_pic longtext NOT NULL, to_user varchar(20) NOT NULL, to_fname varchar(20) NOT NULL, to_pic longtext NOT NULL, message longtext NULL,attachment longtext NULL,type varchar(20) NULL, mst varchar(40) NOT NULL,reply longtext NULL,fname varchar(20) NULL,replytype varchar(20) NULL,replyattachment longtext NULL, status varchar(10) NOT NULL, callduration varchar(20) NOT NULL, fromdelete varchar(20) NULL, todelete varchar(20) NULL);");
 db.query("CREATE TABLE IF NOT EXISTS group_messages (messageId INT NOT NULL AUTO_INCREMENT PRIMARY KEY, groupId INT NOT NULL, groupname varchar(20), uniquegroupname varchar(20), senderpic longtext NOT NULL, senderUsername varchar(20) NOT NULL, senderfname varchar(20) NOT NULL, message longtext NULL, mst varchar(40) NOT NULL, attachment longtext NULL, type varchar(20) NULL, replygroupmessage longtext NULL, replygroupfname varchar(20) NULL, replygrouptype varchar(20) NULL,replygroupattachment longtext NULL);");
