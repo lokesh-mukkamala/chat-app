@@ -30,6 +30,7 @@
     "ng-material-datetimepicker": "^1.16.1",
     "node-notifier": "^5.2.1",
     "nodemailer": "^4.6.4",
+    "pg": "^7.4.3",
     "serve-favicon": "~2.4.5",
     "socket.io": "^2.0.4"
   }

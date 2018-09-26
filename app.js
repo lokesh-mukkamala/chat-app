@@ -4,6 +4,7 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var database = require('pg');
 var mysql = require('mysql');
 var each = require('foreach');
 var multer = require('multer');
@@ -181,13 +182,21 @@ app.use(function(req, res, next) {
 app.use('/', index);
 app.use('/users', users);
 
-//mySQL connection
-var db = mysql.createConnection({
-  host: 'ec2-174-129-35-61.compute-1.amazonaws.com',
-  user: 'jhokofacydijjy',
-  password: 'e1d0ebe0a8d4be153f19591579631edfb144699a20792275c3dccf264e6c7b41',
-  database: 'd2s425j40cbvq'
+
+var db = new database({
+  connectionString: process.env.DATABASE_URL,
+  ssl: true,
 });
+
+db.connect();
+
+//mySQL connection
+// var db = mysql.createConnection({
+//   host: 'ec2-174-129-35-61.compute-1.amazonaws.com',
+//   user: 'jhokofacydijjy',
+//   password: 'e1d0ebe0a8d4be153f19591579631edfb144699a20792275c3dccf264e6c7b41',
+//   database: 'd2s425j40cbvq'
+// });
 
 // db.query("CREATE DATABASE IF NOT EXISTS chat_application");
 db.query("CREATE TABLE IF NOT EXISTS register (fname text NOT NULL,lname text NOT NULL,image varchar(255) NULL,phno varchar(20) NOT NULL,uname varchar(20) NOT NULL,pswd varchar(15) NOT NULL,PRIMARY KEY (uname),onlineindication varchar(20) NULL, email varchar(40) NOT NULL, lastseen longtext NULL);");
