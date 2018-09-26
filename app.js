@@ -182,12 +182,11 @@ app.use('/', index);
 app.use('/users', users);
 
 //mySQL connection
-// postgres://phexxnxqbekrml:77eada80ad5668af2d2187fa1409bfbf25a2e739056e99ec68dc5de3535b5a9f@ec2-174-129-32-37.compute-1.amazonaws.com:5432/d1d3n3ag44o7oo
 var db = mysql.createConnection({
-  host: 'ec2-174-129-32-37.compute-1.amazonaws.com:5432',
-  user: 'phexxnxqbekrml',
-  password: '77eada80ad5668af2d2187fa1409bfbf25a2e739056e99ec68dc5de3535b5a9f',
-  database: 'd1d3n3ag44o7oo'
+  host: 'localhost',
+  user: 'root',
+  password: 'lokesh',
+  database: 'chat_application'
 });
 
 // db.query("CREATE DATABASE IF NOT EXISTS chat_application");
