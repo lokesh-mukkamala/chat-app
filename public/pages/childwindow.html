@@ -1,0 +1,163 @@
+<html>
+<head>
+    <title></title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.9/angular.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="/froalaeditor/css/froala_editor.pkgd.min.css" rel="stylesheet" type="text/css" />
+    <link href="/froalaeditor/css/froala_style.min.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="/froalaeditor/js/froala_editor.pkgd.min.js"></script>
+    <style>
+        .audio video[poster]{
+            width: 50px;
+            height: 50px;
+            border-radius: 50%; 
+        }
+    </style>
+    <script type="text/javascript">
+        var app = angular.module('MyChildApp', [])
+        app.controller('MyChildController', function ($scope, $filter, $window, $interval) {
+            $scope.makesurebtnclicked = null;
+            $scope.seconds= 0;$scope.minutes= 0;$scope.hours= 0;
+            $scope.typeofcall = $window.typeofcall;
+            $scope.calleepic = $window.calleepic;
+            $scope.callerpic = $window.callerpic;
+            $scope.hidebycallerbtn = null;
+            $scope.hideSandRbtn = null;
+            $scope.hidesharescreenbtn = null;
+            $scope.hidereturntocallbtn = null;
+            $window.getLocalVideo = function(localvideo){
+                localVideo1.srcObject = localvideo;
+            }
+            $window.getRemoteVideo = function(remotevideo){
+                $scope.callstarttime = $filter('date')(new Date(), 'h:mm:ss a dd MMM y');
+                $scope.hidebycallerbtn = 'show';
+                $scope.$digest();
+                $scope.interval = $interval(function(){
+                    $scope.seconds +=1;
+                    if($scope.seconds == 60){
+                        $scope.minutes += 1; 
+                        $scope.seconds = 0;
+                        if($scope.minutes == 60){
+                            $scope.hours += 1;
+                            $scope.minutes = 0;
+                        }
+                    }
+                }, 1000);
+                if($scope.typeofcall === 'video'){
+                    remoteVideo1.srcObject = remotevideo;
+                }
+                if($scope.typeofcall === 'audio'){
+                    remoteVideo2.srcObject = remotevideo;
+                }
+            }
+            $scope.testdata = $window.name;
+            $scope.shareScreen = function(){
+                $scope.hidesharescreenbtn = 'hide';
+                $scope.hidereturntocallbtn = 'show';
+                shareScreen();
+            }
+            $scope.returnToCall = function(){
+                $scope.hidesharescreenbtn = null;
+                $scope.hidereturntocallbtn = null;
+                returnToCall();
+            }
+            $window.hidesandrbtn = function(){
+                $scope.hideSandRbtn = 'hide';
+            }
+            $window.showsandrbtn = function(){
+                $scope.hideSandRbtn = null;
+            }
+            angular.element(document).ready(function () {
+                angular.element('.froalaeditortovideocall').froalaEditor({
+                    toolbarButtons: ['formatOL','formatUL'],
+                    quickInsertTags : [''],
+                    placeholderText: 'Sticky Notes',
+                });
+                angular.element('.froalaeditortovideocall').on("froalaEditor.contentChanged", function(){
+                    $scope.stickynotes = angular.element(this).froalaEditor('html.get');
+                });
+                angular.element('.froalaeditortovideocall').froalaEditor('html.set', $scope.continuestickynotes);
+            });
+            $scope.saveStickyNotes = function(){
+                stickyNotes($scope.stickynotes);
+            }
+            $scope.endCallByCaller = function(){
+                $scope.makesurebtnclicked = 'clicked';
+                endCallByCaller();
+            }
+            $scope.endCall = function(){
+                $scope.makesurebtnclicked = 'clicked';
+                endCall($scope.callstarttime,$scope.stickynotes,$filter('date')(new Date(), 'h:mm:ss a dd MMM y'));
+            }
+            window.onbeforeunload = function(){
+                if($scope.hidebycallerbtn === null){
+                    if($scope.makesurebtnclicked === null){
+                        endCallByCaller();
+                    }
+                }else{
+                    if($scope.makesurebtnclicked === null){
+                        endCall($scope.callstarttime,$scope.stickynotes,$filter('date')(new Date(), 'h:mm:ss a dd MMM y'));
+                    }
+                }
+            }
+        });
+    </script>
+   
+</head>
+<body ng-app="MyChildApp" ng-controller="MyChildController">
+    <div class="container-fluid">
+        <h1>{{testdata}}</h1>
+        <div><span ng-hide="hours === 0">{{hours}}H:</span><span ng-hide="minutes === 0">{{minutes}}M:</span>{{seconds}}S</div>
+        <div class="row" ng-show="typeofcall == 'video'">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div>
+                    <video poster="/uploads/profileimages/{{calleepic}}" id="remoteVideo1" autoplay style="position: relative;width: 100%; height: auto;"></video>
+                </div>
+                <div style="margin-top: -100px;">
+                    <video poster="/uploads/profileimages/{{callerpic}}" id="localVideo1" autoplay muted style="transform: rotateY(180deg); height: 100px; right: 0;position: absolute;border: 1px solid black;"></video>
+                </div>
+                <center>
+                    <button class="btn btn-danger" style="position: absolute; border-radius: 50%; padding: 10px; margin-top: 40px;" ng-click="endCallByCaller()" ng-show="hidebycallerbtn === null"><i class="fa fa-phone"></i></button>
+                    <button class="btn btn-danger" style="position: absolute; border-radius: 50%; padding: 10px; margin-top: 40px;" ng-click="endCall()" ng-hide="hidebycallerbtn === null"><i class="fa fa-phone"></i></button>
+                </center>
+                <div ng-show="hideSandRbtn === null">
+                    <button ng-show="hidesharescreenbtn === null" class="btn btn-danger" style="position: absolute; padding: 10px; margin-top: 40px;" ng-click="shareScreen()"><i class="fa fa-window-restore">Share screen</i></button>
+                    <button ng-hide="hidereturntocallbtn === null" class="btn btn-danger" style="position: absolute; padding: 10px; margin-top: 80px;" ng-click="returnToCall()"><i class="fa fa-window-restore">Back to call</i></button>
+                </div>                
+            </div>
+        </div>
+        <div class="row audio" ng-show="typeofcall == 'audio'">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div>
+                    <video poster="/uploads/profileimages/{{calleepic}}" id="remoteVideo2" poster="" autoplay style="position: relative;min-width: 100%; min-height: 70%;"></video>
+                </div>
+                <center>
+                    <button class="btn btn-danger" style="position: absolute; border-radius: 50%; padding: 10px; margin-top: 40px;" ng-click="endCallByCaller()" ng-show="hidebycallerbtn === null"><i class="fa fa-phone"></i>by caller</button>
+                    <button class="btn btn-danger" style="position: absolute; border-radius: 50%; padding: 10px; margin-top: 40px;" ng-click="endCall()" ng-hide="hidebycallerbtn === null"><i class="fa fa-phone"></i></button>
+                </center>
+                <button class="btn btn-danger" style="position: absolute; border-radius: 50%; padding: 10px; margin-top: 40px;" ng-click="shareScreen()"><i class="fa fa-window-restore"></i></button>
+            </div>
+        </div>
+        <div class="row" ng-hide="hidebycallerbtn === null">
+            <br><br><br><br><br><br>
+            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3"></div>
+            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                <form name="stickyform">
+                    <div>
+                        <md-input-container class="md-block">
+                            <textarea class="froalaeditortovideocall" aria-label="froalaeditortovideocall" name="stickynotes" ng-model="stickynotes" required></textarea>
+                        </md-input-container>
+                    </div>
+                    <button class="btn btn-success" ng-disabled="!stickynotes" ng-click="saveStickyNotes()">
+                        Save
+                    </button>
+                </form>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3"></div>
+        </div>
+    </div>
+</body>
+</html>

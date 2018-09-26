@@ -1,0 +1,82 @@
+
+<div class="container-fluid"  style="background-color:#57a1e6;height:100%;">
+    <div class="row" style="height:250px;background:#1f82dc;font-family: 'Amarante';color:white;">
+        <div class="col-lg-12 col-md-12 col-xs-12">
+            <center style="padding-top:80px;font-size:50px;">
+                <div>Chat Name</div>
+                <p style="font-family:'Allura';font-size:40px;">Add some Tag line Here</p>
+            </center>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12 col-md-12 col-xs-12">
+            <center>
+                <md-button class="btn" style="width:150px;background:#FFFEFB;color:#1f82dc;font-size:22px;padding:5px 20px 5px 20px;margin-top:-25px;">
+                    <a href="/signup">Join Us</a>
+                </md-button>
+            </center>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12 col-md-12 col-xs-12">
+            <center>
+                    <form name="loginForm" class="sign-form card">
+                        <div ng-show="errorMessage !== null" style="color: red;">{{errorMessage}}</div>    
+                        <div ng-show="successMsg !== null" style="color: #00ff00;">{{successMsg}}</div>                        
+                        <div style="padding-top:50px;"> 
+                            <md-input-container class="mic">
+                                <input  class="active" id="username" name="username" aria-label="username" type="text" ng-model="myCtrl.username" placeholder="Enter username" required autofocus>
+                                <div ng-messages="loginForm.username.$error">
+                                    <div ng-message="required">username is required</div>
+                                </div>
+                            </md-input-container>
+                        </div>
+                        
+                        <div>
+                            <md-input-container class="mic">
+                                <input  id="password" name="password" aria-label="password" type="password" ng-model="myCtrl.password" placeholder="Enter Password" autofocus  required  />
+                                <div ng-messages="loginForm.password.$error">
+                                    <div ng-message="required">password is required</div>
+                                </div>
+                            </md-input-container>
+                        </div>
+                       
+                        <div>
+                            <center>
+                                <md-button type="submit" class="btn" ng-disabled="loginForm.$invalid" ng-click="login(myCtrl)">Login</md-button>
+                            </center>
+                        </div>
+                        
+                    </form>
+            <div style="color: red;">
+                <span class="unames" data-toggle="modal" data-target="#forgotpswd" style="cursor: pointer;">Forgot Password</span>
+            </div>
+
+            <div class="modal fade" id="forgotpswd" role="dialog" style="padding-top:100px; color: black;">
+                <div class="modal-dialog modal-md mcard" style="padding: 30px;"> 
+                    <form>
+                        <div>
+                            <label>Please enter your registered mailId</label>
+                            <input type="text" name="mailId" ng-model="mailId">
+                        </div>
+                        <div>
+                            <button ng-click="forgotPswd(mailId)" data-dismiss="modal">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            </center>
+            
+            
+        </div>
+    </div>
+</div> 
+
+
+
+
+
+
+
+
+

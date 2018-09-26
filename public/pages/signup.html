@@ -1,0 +1,116 @@
+<div class="container-fluid"  style="background-color:#57a1e6;min-height:100vh;">
+        <div class="row" style="height:250px;background:#1f82dc;font-family: 'Amarante';color:white;">
+            <div class="col-lg-12 col-md-12 col-xs-12">
+                <center style="padding-top:80px;font-size:50px;">
+                    <div>Chat Name</div>
+                    <p style="font-family:'Allura';font-size:40px;">Add some Tag line Here</p>
+                </center>
+                <div style="color: white;">{{forgotsuccessmsg}}</div>
+                <div style="color: white;">{{forgoterrormsg}}</div>
+                <center>
+                    <form  name="signUpForm" id="sign-form" class="sign-form" style="margin-top:-10px;">
+                        <div>
+                            <md-input-container class="mic">
+                                <input name="firstname" aria-label="firstname" type="text" placeholder="First Name" ng-model="myCtrl.firstname" required autofocus>
+                                <div ng-messages="signUpForm.firstname.$error">
+                                    <div ng-message="required">Please Fill FirstName</div>
+                                </div>
+
+                            </md-input-container>
+                        </div>    
+                            
+                        <div>
+                            <md-input-container class="mic">
+                                <input name="lastname" aria-label="lastname" type="text" placeholder="Last Name" ng-model="myCtrl.lastname"  required autofocus/>
+                                <div ng-messages="signUpForm.lastname.$error">
+                                    <div ng-message="required">Please Fill Last Name</div>
+                                </div>
+                            </md-input-container>
+                        </div>
+                        <div>
+                            <md-input-container class="mic">
+                                <input name="email" aria-label="email" type="email" placeholder="Email" ng-model="myCtrl.email" required autofocus/>
+                                <div ng-messages="signUpForm.email.$error">
+                                    <div ng-message="required">Please Give Your Email</div>
+                                </div>
+                                <span style="color:red" ng-show="signUpForm.email.$dirty && signUpForm.email.$invalid">
+                                        <span ng-show="signUpForm.email.$error.email">Invalid email address.</span>
+                                </span>
+                            </md-input-container>   
+                        </div> 
+                        <div>
+                            <md-input-container class="mic">
+                                <input name="phonenumber" onkeypress='return event.charCode >= 48 && event.charCode <= 57' aria-label="phonenumber" type="text" minlength='10' placeholder="Mobile Number" maxlength="10" ng-model="myCtrl.phonenumber" required autofocus/>
+                                <div ng-messages="signUpForm.phonenumber.$error">
+                                    <div ng-message="required">Please Fill Phone Number</div>
+                                </div>
+                                <span style="color:red" ng-show="signUpForm.phonenumber.$dirty && signUpForm.phonenumber.$invalid" >
+                                        <span>Mobile Number must be 10 digits.</span>
+                                </span>
+                            </md-input-container>   
+                        </div>
+                        <div>
+                            <md-input-container class="mic">
+                                <input name="username" ng-change=usernamevalidation(myCtrl.username); aria-label="username" type="text" placeholder="User Name" ng-model="myCtrl.username" required autofocus/>
+                                <div ng-messages="signUpForm.username.$error">
+                                    <div ng-message="required">Please Fill User Name</div>
+                                    <div style="color: red;">{{x}}</div>
+                                </div>
+                            </md-input-container> 
+                        </div>
+                        <div>
+                            <md-input-container class="mic">
+                                <input name="pswd" aria-label="pswd" type="password" minlength='8' placeholder="Password" ng-model="myCtrl.password" required autofocus>
+                                <div ng-messages="signUpForm.pswd.$error">
+                                    <div ng-message="required">Please Fill Password</div>
+                                </div>
+                                <span style="color:red" ng-show="signUpForm.pswd.$dirty && signUpForm.pswd.$invalid" >
+                                    <span>Password must be at least 8 <br>characters long.</span>
+                                </span>
+                            </md-input-container>  
+                        </div>
+                        <div>
+                            <md-input-container class="mic">
+                                <md-checkbox name="TC" ng-model="myCtrl.TC" required style="color: black;">
+                                    I Agree To Terms And Conditions
+                                </md-checkbox>
+                                <div>
+                                    <span style="color:black;"><a href="/TandC">Show Terms and Conditions</a></span>
+                                </div>
+                            </md-input-container>
+                        </div>
+                             
+                        <div>
+                            <center>
+                                <md-button type="submit" class="btn" ng-disabled="signUpForm.$invalid"  ng-click="signup(myCtrl)"  style="background-color:#1f82dc;color:#FFFEFB;">Sign Up</md-button>
+                            </center>
+                            <div>
+                               <span style="color:black;"> Member Of Us  <a href="/login">Login</a></span>
+                            </div>
+                            
+                        </div>  
+                    </form>
+
+                    <div style="color: red;">
+                        <span class="unames" data-toggle="modal" data-target="#forgotpswd" style="cursor: pointer;">Forgot Password</span>
+                    </div>
+        
+                    <div class="modal fade" id="forgotpswd" role="dialog" style="padding-top:100px; color: black;">
+                        <div class="modal-dialog modal-md mcard" style="padding: 30px;"> 
+                            <form>
+                                <div>
+                                    <label>Please enter your registered mailId</label>
+                                    <input type="text" name="mailId" ng-model="mailId">
+                                </div>
+                                <div>
+                                    <button ng-click="forgotPswd(mailId)" data-dismiss="modal">Submit</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    
+                </center>
+            </div>
+        </div>
+</div> 
+

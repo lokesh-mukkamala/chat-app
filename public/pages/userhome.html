@@ -1,0 +1,2038 @@
+<div class="container-fluid content" ng-controller="socketctrl">
+
+    <div class="row header" style="height: 40px;">
+        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-6">
+            Chat Name
+            <a ng-click="pro()">
+                <img ng-src="/uploads/profileimages/{{profilePic}}"> 
+            </a> 
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-1 col-xs-3"></div>
+        <div class="col-lg-1 col-md-1 col-sm-3 hidden-xs">
+            <md-menu-bar role="menubar">
+                    <span style="background: red; color: #FFFEFB; font-size: 9px; border-radius: 50%;margin-left: 15px;position: absolute;" ng-hide="bellnotifications == 0" class="label">{{bellnotifications}}</span>
+                <md-menu>
+                    <button ng-click="$mdOpenMenu()">
+                        <i class="fa fa-bell-o" style="padding-top:3px;color: rgba(39,49,66,0.6);"></i>
+                    </button>
+                    <md-menu-content style="width: auto;">
+                        <md-menu-item>
+                            <div>
+                                <span class="btn btn-default" id="meetingnotifyid" ng-click="showMeetingNotifications()" md-prevent-menu-close="md-prevent-menu-close">
+                                    Meetings
+                                    <sup><span class="label">{{meetingnotificationcount}}</span></sup>
+                                </span>
+                                <span class="btn btn-default" id="groupnotifyid" ng-click="showGroupNotifications(groupnotificationscount)" md-prevent-menu-close="md-prevent-menu-close">
+                                    Groups
+                                    <sup><span class="label">{{groupnotificationscount}}</span></sup>
+                                </span>
+                            </div>
+                        </md-menu-item>   
+                        <md-menu-item ng-hide="MGnotifications !== 'Mnotifications'" ng-repeat="notification in notifications | orderBy:'$index':true" ng-if="notification.organizer === youName" style="height: auto; border-bottom: 1px solid rgba(39,49,66,0.2);padding: 10px 0px;" ng-show="(notification.organizer== youName && notification.accept_or_reject !== null) && (MGnotifications !== 'MGnotifications') ">
+                            <div ng-class="{unseen: notification.status== 'unseen', seen: notification.status != 'unseen'}" ng-click="meetingNotificationSeen(notification)">
+                                <span>{{notification.participant}}</span>
+                                <span ng-class="{accept: notification.accept_or_reject == 'Accepted', reject: notification.accept_or_reject != 'Accepted'}">{{notification.accept_or_reject}}</span>
+                                <span ng-hide="notification.accept_or_reject == 'Proposed'">the</span>
+                                <span ng-hide="notification.accept_or_reject !== 'Proposed'">time for the meeting</span>
+                                <span>{{notification.meetingsubject}}</span>
+                                <br>
+                                <span ng-hide="notification.accept_or_reject !== 'Proposed'">
+                                   <span style="color: rgba(39,49,66,0.6);">Details: {{notification.proposeddate | date : "fullDate" }} {{notification.proposedtime | date : "h:mm a"}}</span>
+                                </span>
+                                <div style="color: rgba(39,49,66,0.6);word-wrap: break-word;width:40vw;text-align: left;"><span ng-if="notification.reason">Reason: </span>{{notification.reason}}</div>
+                            </div>
+                        </md-menu-item>
+                        <md-menu-item  ng-hide="MGnotifications !== 'Gnotifications'" ng-repeat="notification in groupnotifications | orderBy:'$index':true" style="height: auto; border-bottom: 1px solid rgba(39,49,66,0.2);padding: 10px 0px;">
+                            <div>
+                                <span>groupname: {{notification.groupname}}</span>
+                                <span>oldadmin: {{notification.oldadmin}}</span>
+                                <span>newadmin: {{notification.newadmin}}</span>
+                            </div>
+                        </md-menu-item>
+                    </md-menu-content>
+                </md-menu>  
+            </md-menu-bar>
+        </div>
+        <div class="col-lg-1 col-md-1 col-sm-2 col-xs-3">
+            <button data-toggle="tooltip" data-placement="left" title="Sign Off" class="btnlogout" ng-click="logout(youName,selectedStatusItem)">Logout</button>
+        </div> 
+    </div>
+
+    <!-- main row -->
+    <div class="row main">
+
+        <!-- menu items div -->
+        <div class="visible-xs header" style="border-bottom:solid 1px rgba(39,49,66,0.1);">
+            <div class="row">
+                <div class="col-xs-6">
+                    <md-button ng-click="sidenavMenu()" class="md-icon-button fa fa-bars" aria-label="menu"></md-button>
+                </div>
+                <div class="col-xs-6" style="text-align: center">
+                    <md-menu-bar role="menubar">
+                        <span style="background: red; color: #FFFEFB; font-size: 9px; border-radius: 50%;margin-left: 15px;position: absolute;" ng-hide="bellnotifications == 0" class="label">{{bellnotifications}}</span>
+                        <md-menu>
+                            <button ng-click="$mdOpenMenu()">
+                                <i class="fa fa-bell-o" style="padding-top:3px;color: rgba(39,49,66,0.6);"></i>
+                            </button>
+                            <md-menu-content style="width: auto;">
+                                <md-menu-item>
+                                    <div>
+                                        <span class="btn btn-default" id="meetingnotifyid" ng-click="showMeetingNotifications()" md-prevent-menu-close="md-prevent-menu-close">
+                                            Meetings
+                                            <sup><span class="label">{{meetingnotificationcount}}</span></sup>
+                                        </span>
+                                        <span class="btn btn-default" id="groupnotifyid" ng-click="showGroupNotifications(groupnotificationscount)" md-prevent-menu-close="md-prevent-menu-close">
+                                            Groups
+                                            <sup><span class="label">{{groupnotificationscount}}</span></sup>
+                                        </span>
+                                    </div>
+                                </md-menu-item>   
+                                <md-menu-item ng-hide="MGnotifications !== 'Mnotifications'" ng-repeat="notification in notifications | orderBy:'$index':true" ng-if="notification.organizer === youName" style="height: auto; border-bottom: 1px solid rgba(39,49,66,0.2);padding: 10px 0px;" ng-show="(notification.organizer== youName && notification.accept_or_reject !== null) && (MGnotifications !== 'MGnotifications') ">
+                                    <div ng-class="{unseen: notification.status== 'unseen', seen: notification.status != 'unseen'}" ng-click="meetingNotificationSeen(notification)">
+                                        <span>{{notification.participant}}</span>
+                                        <span ng-class="{accept: notification.accept_or_reject == 'Accepted', reject: notification.accept_or_reject != 'Accepted'}">{{notification.accept_or_reject}}</span>
+                                        <span ng-hide="notification.accept_or_reject == 'Proposed'">the</span>
+                                        <span ng-hide="notification.accept_or_reject !== 'Proposed'">time for the meeting</span>
+                                        <span>{{notification.meetingsubject}}</span>
+                                        <br>
+                                        <span ng-hide="notification.accept_or_reject !== 'Proposed'">
+                                            <span style="color: rgba(39,49,66,0.6);">Details: {{notification.proposeddate | date : "fullDate" }} {{notification.proposedtime | date : "h:mm a"}}</span>
+                                        </span>
+                                        <div style="color: rgba(39,49,66,0.6);word-wrap: break-word;width:40vw;text-align: left;"><span ng-if="notification.reason">Reason: </span>{{notification.reason}}</div>
+                                    </div>
+                                </md-menu-item>
+                                <md-menu-item  ng-hide="MGnotifications !== 'Gnotifications'" ng-repeat="notification in groupnotifications | orderBy:'$index':true" style="height: auto; border-bottom: 1px solid rgba(39,49,66,0.2);padding: 10px 0px;">
+                                    <div>
+                                        <span>groupname: {{notification.groupname}}</span>
+                                        <span>oldadmin: {{notification.oldadmin}}</span>
+                                        <span>newadmin: {{notification.newadmin}}</span>
+                                    </div>
+                                </md-menu-item>
+                            </md-menu-content>
+                        </md-menu>  
+                    </md-menu-bar>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-2 col-md-2 col-sm-3 hidden-xs menu" id="myDIV">
+            <ul style="padding-left: 0vw;padding-top: 1vw;list-style:none;">
+                <li>
+                    <button class="btnn active"  ng-click="userlist();livequotecount();">
+                        <span class="fa fa-home"></span>
+                        Home
+                    </button>
+                </li><br>
+                <li>
+                    <button class="btnn" ng-click="pro();livequotecount();">
+                        <span class="fa fa-user-o"></span> 
+                        Profile
+                    </button>
+                </li><br>
+                <li>
+                    <button class="btnn" ng-click="addgroup();livequotecount();">
+                        <span class="fa fa-group"></span>
+                        Create Group
+                    </button>
+                </li><br>
+                <li>
+                    <button class="btnn" ng-click="meeting();livequotecount();">
+                        <span class="fa fa-handshake-o"></span>
+                        Meetings
+                    </button>
+                    <span style="background: red; color: #FFFEFB; font-size: 9px; border-radius: 50%;" class="label">{{newmeetingnotifications}}</span>
+                </li><br>
+                <li>
+                    <button class="btnn" ng-click="sharefiles();livequotecount();">
+                        <span class="fa fa-folder-open-o"></span>
+                        Share Files
+                    </button>
+                    <span style="background: red; color: #FFFEFB; font-size: 9px; border-radius: 50%;" class="label">{{sharefilenotifications}}</span>
+                </li><br>
+                <li>
+                    <button class="btnn" ng-click="leaveLetter();livequotecount();">
+                        <span class="fa fa-envelope-o"></span>
+                        Leaves
+                    </button>
+                    <span style="background: red; color: #FFFEFB; font-size: 9px; border-radius: 50%;" class="label">{{leaveletternotifications}}</span>
+                </li><br>
+                <li>
+                    <button class="btnn" ng-click="callHistroy();livequotecount();">
+                        <span class="fa fa-history"></span>
+                        Call Histroy
+                    </button>
+                </li><br>
+                <li>
+                    <button class="btnn" ng-click="quotes();infocountdecrement(youName);">
+                        <span class="fa fa-quote-left"></span>
+                        Quotes
+                    </button>
+                    <span style="background: red; color: #FFFEFB; font-size: 9px; border-radius: 50%;" class="label">{{infocount}}</span>
+                </li><br>
+                <li>
+                    <button class="btnn" ng-click="Settings()">
+                        <span class="fa fa-cog"></span>
+                        Settings
+                    </button>
+                </li><br>
+            </ul>
+        </div>
+
+        <!-- end of menu items div -->
+
+        <!-- list of users -->
+
+        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12 user-list" ng-show="ctrl === null">
+            <md-input-container style="width: 100%;">
+                <label class="fa fa-search"> Search</label>
+                <input type="text" ng-model="lists">
+            </md-input-container>
+            <span ng-repeat="group in groups | orderBy :'-date' | emptyToEnd:'date' | filter: searchlists">
+                <div id="otodiv" ng-disabled ="group.onlineindication == 'Do Not Disturb'" ng-show="group.fname != you && group.uname != null" ng-click="selectedUser(group.fname,group.uname,group.image,group.lname,group.phno,group.onlineindication,group.email,group.lastseen)" class="users">
+                    <img ng-src="/uploads/profileimages/{{group.image}}" class="u-image" ng-click="toggleSidenave()">
+                    <span style="padding:10px;"> {{group.fname}} {{group.lname}}</span>
+                    <span style="float: right;margin-right:10px;">
+                        <span class="status"  ng-hide="(group.onlineindication == 'Offline')" ng-class="{online : (group.onlineindication == 'Online'),dontdisturb : (group.onlineindication == 'Do Not Disturb'), away : (group.onlineindication == 'Away'), busy : (group.onlineindication == 'Busy'), offwork : (group.onlineindication == 'Off Work'), willbeback : (group.onlineindication == 'Will Be Back') }">
+                            {{group.onlineindication}}
+                        </span>
+                        <span class="count">{{group.count}}</span>
+                    </span>
+                    <div class="lastmsg">
+                        <span ng-if="group.lastmsg !== '///Deleted///' && group.lastmsg !== '***Call Ended***' && group.lastmsg !== '*/*/*Call Duration*/*/*' && group.lastmsg !== '***Call Rejected***'">{{group.lastmsg}}</span>
+                        <span ng-if="group.lastmsg === '///Deleted///'"><i>This message is Deleted</i></span>
+                        <span ng-if="group.lastmsg == '***Call Ended***' || group.lastmsg == '*/*/*Call Duration*/*/*'">Call Ended</span>
+                        <span ng-if="group.lastmsg == '***Call Rejected***'">Call Rejected</span>
+                    </div>
+                    <div ng-show = "selectedUserName== user.uname" style="color: red; font-size: 13px;">{{disablederror}}</div>
+                </div>
+                
+                <div class="users" style="height:70px;" ng-repeat="member in group.members" ng-show="group.members[$index].memberuname === youName" ng-click="selectedGroup(group.groupId,group.groupname,group.groupimage,group.uniquegroupname,group.admin);getGroupMsgs(group.groupId,group.groupname,group.uniquegroupname)" style="padding:10px;">
+                    <img ng-src="/uploads/profileimages/{{group.groupimage}}" ng-click="toggleSidenaveGroup()" class="u-image">
+                    <span style="padding-left:10px;">{{group.groupname}}</span><span class="count">{{group.groupcount}}</span>
+                    <div class="lastmsg">
+                        <span ng-hide="group.grouplastmsg === '///Deleted///'"  style="margin-bottom: 100px;">{{group.grouplastmsg}}</span>
+                        <span ng-show="group.grouplastmsg === '///Deleted///'"><i>This message is Deleted</i></span>
+                    </div>
+                </div>
+            </span>
+        </div>
+
+        <!-- list of users ends -->
+
+        <!-- Profile -->
+        
+        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12 proback" ng-show =" ctrl === 'profile'">
+            <div class="row" style="background:#1f82dc;height:130px;"><br>
+                <center>
+                    <span style="color:red;padding:5px;  background-color: #ffffff;opacity: 0.6;" ng-hide="profileerrfile == null">{{profileerrfile}}</span>
+                </center>
+            </div>
+            <div class="row">
+                <center>
+                    <div class="imgoverlay">
+                        <img ng-src="/uploads/profileimages/{{profilePic}}" class="image proimage">    
+                        <div class="middle">
+                            <div class="text">
+                                <span class="select fileinput-button">
+                                    <span style="font-size:25px;color:black" class="fa fa-camera"></span>
+                                    <input type="file" name="file" accept="image/*" file-model = "preprofilepic">
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <md-input-container>
+                            <md-select ng-model="selectedStatusItem" aria-label="selectedStatusItem">
+                                <md-optgroup label="status">
+                                <md-option ng-repeat="s in status" ng-click="getSelectedSatus(s.sta)" ng-value="s.sta" data-toggle="tooltip" data-placement="top" title="{{s.tool}}" class="btnlog">{{s.sta}}</md-option>
+                                </md-optgroup>
+                            </md-select>
+                        </md-input-container>
+                    </div>
+                </center>
+            </div>
+            <div class="row" style="padding-top:40px;">
+                <center>
+                    <div class="page" id="page-profile">
+                        <center>
+                            <br>
+                            <div>
+                                <span>{{fnameerr}}</span>
+                                <span>First Name</span>
+                                <div class="editfield" click-to-edit type="fname" ng-model="profile[0].fname"></div>
+                            </div>
+                            <br>
+                            <div>
+                                <span>Last Name</span>
+                                <div class="editfield"  click-to-edit type="lname" ng-model="profile[0].lname"></div>	
+                            </div>
+                            <br>
+                            <div>
+                                <span>Phone Number</span>
+                                <div class="editfield"  click-to-edit onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="10" minlength="10" type="phno" ng-model="profile[0].phno"></div>	
+                            </div>
+                            <br>
+                            
+                        </center>	
+                    </div>
+                </center>
+            </div>
+        </div>
+        <!-- profile ends --> 
+
+        <!-- Group Creation Div -->
+
+        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12 proback" ng-show =" ctrl === 'addgroup'">
+            <form name="groupCreationForm" novalidate style="margin-top:50px;">
+                <div>
+                    <button id="cleargroupdata" class="btn btn-success" style="float:right;" ng-disabled="groupofuser.length == 0 || groupCreationForm.$invalid " ng-click="createGroup(groupCreationForm,newGroupName,groupofuser);userlist()">Create</button>
+                </div>
+
+                <md-input-container class="mic">
+                    <label style="color:rgb(39,49,66);">Group Name</label>
+                    <input name="groupname" aria-label="groupname" type="text" ng-model="newGroupName" required autofocus>
+                    <div ng-messages="groupCreationForm.groupname.$error">
+                        <div ng-message="required" style="color: #1f82dc;">Please Give A Name To Group</div>
+                    </div>
+                </md-input-container>
+
+                <div class="groupcreate">
+                    <div style="color: rgb(39,49,66)">Add Members To Group</div>
+                    <select class="meetmembers" id="g" multiple="multiple" style="width:auto" ng-model="groupofuser" required>
+                        <option ng-repeat="c in child | orderBy : 'fname'" value="{{c.uname}}" ng-if="c.uname !== youName">
+                            {{c.uname}}
+                        </option>
+                    </select>
+                </div>
+
+            </form>                
+        </div> 
+
+        <!--End Group Creation Div -->
+
+        <!-- Meetings list -->
+
+        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12 user-list" ng-show =" ctrl === 'meeting'">
+            <br>
+            <section layout="row" layout-sm="column" layout-align="center center" layout-wrap="">
+                <md-button class="md-raised" ng-click="createMeeting()" style="text-transform: capitalize;">Create New Meeting</md-button>
+            </section>
+            <div>
+                <md-input-container style="width: 100%;">
+                    <label class="fa fa-search"> Search</label>
+                    <input type="text" ng-model="meets">
+                </md-input-container>
+            </div>
+            <div>
+                <span ng-repeat="meet in meetings | orderBy:'$index':true | filter: searchmeetings">
+                     <div class="users" style="height:70px;"  ng-repeat="meetmember in meet.meetmembers"  ng-class="(meetmember.status == 'unseen') ? 'unseen' :'seen'" ng-show="meet.meetmembers[$index].membersinmeet === youName" ng-click="selectedmeeting(meet)" style="padding:10px;">
+                         <span>{{meet.meetsubject}}</span>
+                         <br>
+                         <span style="font-size: 12px;" ng-show="meet.momstatusnotification">
+                            <span style="text-transform: capitalize; font-weight: 900">{{meet.meetadmin}}</span>
+                            <span style=" font-weight: 900">{{meet.momstatusnotification}}</span>
+                         </span><br>
+                         <span style="float: right;font-size: 10px;margin-right: 2px;color: #00e600;">{{meet.meetingcmpltd}}</span>
+                     </div>
+                 </span>
+             </div>
+        </div>   
+
+        <!-- meeting list ends -->
+
+        <!-- leave letters list -->
+
+        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12 user-list" ng-show=" ctrl === 'leaveletter' ">
+            <br>
+            <section layout="row" layout-sm="column" layout-align="center center" layout-wrap="">
+                <md-button class="md-raised" ng-click="applyLeave()" style="text-transform: capitalize;">Apply For Leave</md-button>
+            </section>
+            <div>
+                <md-input-container style="width: 100%;">
+                    <label class="fa fa-search"> Search</label>
+                    <input type="text" ng-model="test">
+                </md-input-container>
+            </div>
+            <div ng-hide="hideleavesselect == 'hide'">
+                <md-button class="md-raised" ng-click="selectLeavesToDelete()">{{selectbtninleaves}}</md-button>
+                <md-button class="md-raised" ng-click="selectAllLeavesToDelete()" ng-show="selectallbtn == 'show'">SelectAll</md-button>
+                <md-button class="md-raised" ng-click="deleteMultipleLeaves()" ng-show="selectallbtn == 'show'">Delete</md-button>
+            </div>
+            <div ng-repeat="leave in leaves | orderBy:'$index':true | filter: search" ng-show="leave.fromuname == youName && leave.fromdelete == null" ng-click="selectedLeave(leave)" class="users showdelete"  ng-class="(leave.notification == 'unseen') ? 'unseen' :'seen'" >
+                <span>
+                    <md-checkbox class="leavescheckbox" ng-show="selectallbtn == 'show'" ng-checked="leavesExists(leave)" ng-click="selectedLeaveToDelete(leave)" aria-label="leavescheckbox"></md-checkbox>
+                    {{leave.fromuname}}
+                    {{leave.subject}}
+                    <span style="float: right; margin-right: 10px;">
+                        <span ng-click="deleteLeave(leave)" class="deleteleave btn btn-default fa fa-trash-o" style="opacity: 1; outline: none; border: none"></span>
+                        <span style="color: red;">{{leave.notificationcount}}</span>
+                    </span>
+                </span>
+            </div>
+            <span ng-repeat="leave in leaves | orderBy:'$index':true | filter: search">
+                <div ng-repeat="leavemember in leave.leavemembers" ng-show="leavemember.touname === youName && leavemember.todelete == null" ng-click="selectedLeave(leave)" class="users showdelete"  ng-class="(leave.notification == 'unseen') ? 'unseen' :'seen'" >
+                    <span>
+                        <md-checkbox class="leavescheckbox" ng-show="selectallbtn == 'show'" ng-checked="leavesExists(leave)" ng-click="selectedLeaveToDelete(leave)" aria-label="leavescheckbox"></md-checkbox>
+                        {{leave.fromuname}}
+                        {{leave.subject}}
+                        <span style="float: right; margin-right: 10px;">
+                            <span ng-click="deleteLeave(leave)" class="deleteleave btn btn-default fa fa-trash-o" style="opacity: 1; outline: none; border: none"></span>
+                            <span style="color: red;">{{leave.notificationcount}}</span>
+                        </span>
+                    </span>
+                </div>
+            </span>
+        </div> 
+       
+        <!-- leave letters list end    -->
+
+        <!-- call histroy list -->
+
+        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12 user-list" ng-show=" ctrl === 'callhistroy'">
+            <div>
+                <md-input-container style="width: 100%;">
+                    <label class="fa fa-search"> Search</label>
+                    <input type="text" ng-model="calls">
+                </md-input-container>
+            </div>
+            <!-- <md-button class="md-raised">Button</md-button> -->
+            <md-button class="md-raised" ng-click="showCheckForCallHistory()" ng-hide="hideselectofcall == 'callshide'">{{selectbtn}}</md-button>
+            <md-button class="md-raised" ng-show="selecthistory == 'selecthistory'" ng-click="selectAllCallhistory()">SelectAll</md-button>
+            <md-button class="md-raised" ng-click="deleteMultipleCallHistory()" ng-show="selecthistory == 'selecthistory'">delete</md-button>
+            <span ng-repeat="chd in callhistroydata | orderBy:'$index':true | filter: searchcalls">
+                <div ng-show="chd.calleruname == youName && chd.callerdelete === null" class="showdelete users" ng-click="showCallHistoryDetails(chd)">
+                    <md-checkbox class="callsCheckbox" ng-show="selecthistory == 'selecthistory'" ng-checked="callhistroyExists(chd)" ng-click="selectcallcheckbox(chd)" aria-label="callsCheckbox"></md-checkbox>
+                    <img ng-src="/uploads/profileimages/{{chd.calleepic}}" class="u-image">
+                    <span style="margin-left: 10px;">
+                        {{chd.calleeuname}}
+                        <span class="fa fa-trash-o btn btn-default deleteleave" ng-click="deleteCallhistory(chd)" style="border: none; outline: none; float: right; margin-right: 10px;"></span>
+                    </span>
+                    <span class="calltime">{{chd.callduration}}</span>
+                    <div class="call" ng-if="chd.callendtype == '***Call Ended***'">
+                        <span ng-class="(chd.typeofcall == 'video') ? 'fa fa-video-camera' :'fa fa-phone'" style="margin-right: 10px; color: #00e600;"></span>Out Going
+                    </div>
+                    <div class="call" ng-if="chd.callendtype == '***Call Rejected***'">
+                        <span ng-class="(chd.typeofcall == 'video') ? 'fa fa-video-camera' :'fa fa-phone'" style="margin-right: 10px; color: red"></span>Rejected
+                    </div>
+                    <div class="call" ng-if="chd.callendtype == '*/*/*Call Duration*/*/*'">
+                        <span ng-class="(chd.typeofcall == 'video') ? 'fa fa-video-camera' :'fa fa-phone'" style="margin-right: 10px; color: #00e600;"></span>Out Going
+                    </div>
+                    <span class="calltime">{{chd.callstarttime}}</span>
+                </div>
+                <div ng-show="chd.calleruname !== youName && chd.calleedelete === null" class="showdelete users" ng-click="showCallHistoryDetails(chd)">
+                    <md-checkbox class="callsCheckbox" ng-show="selecthistory == 'selecthistory'" ng-checked="callhistroyExists(chd)" ng-click="selectcallcheckbox(chd)" aria-label="callsCheckbox"></md-checkbox>
+                    <img ng-src="/uploads/profileimages/{{chd.callerpic}}" class="u-image">
+                    <span style="margin-left: 10px;">
+                        {{chd.calleruname}}
+                        <span class="fa fa-trash-o btn btn-default deleteleave" ng-click="deleteCallhistory(chd)" style="border: none; outline: none; float: right; margin-right: 10px;"></span>
+                    </span>
+                    <span class="calltime">{{chd.callduration}}</span>
+                    <div class="call" ng-if="chd.callendtype == '***Call Ended***'">
+                        <span ng-class="(chd.typeofcall == 'video') ? 'fa fa-video-camera' :'fa fa-phone'" style="margin-right: 10px; color: red"></span>Missed Call
+                    </div>
+                    <div class="call" ng-if="chd.callendtype == '***Call Rejected***'">
+                        <span ng-class="(chd.typeofcall == 'video') ? 'fa fa-video-camera' :'fa fa-phone'" style="margin-right: 10px; color: red;"></span>Rejected
+                    </div>
+                    <div class="call" ng-if="chd.callendtype == '*/*/*Call Duration*/*/*'">
+                        <span ng-class="(chd.typeofcall == 'video') ? 'fa fa-video-camera' :'fa fa-phone'" style="margin-right: 10px; color: #00e600;"></span>In Coming
+                    </div>
+                    <span class="calltime">{{chd.callstarttime}}</span>
+                </div>
+            </span>
+        </div>
+
+        <!-- call histroy list end -->
+
+        <!-- settings -->
+
+        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12 proback" ng-show =" ctrl === 'settings'">
+                <div style="margin-top: 20px;">
+                    <span style="color: #1f82dc">Change Password</span>
+                    <button ng-click="enableEditor();clear()" class="btnlogout" style="float: right;" ng-bind="edit"></button>
+                    <div  class="pswderror" style="color: #16b03f;">{{editmsg}}</div><br>
+                    <div ng-hide="edit == 'edit'">
+                        <form name="editpswdForm" ng-submit="changePswd(socketctrl) && editpswdForm.$valid && ok()" style="font-size: 10px;">
+                            <div>
+                                <md-input-container style="margin-top:-18px; margin-bottom: -18px; width: auto;">
+                                    <input placeholder="Old Password" class="editinput" name="oldpswd" type="password" ng-model="socketctrl.oldpswd" required>
+                                </md-input-container>
+                            </div>
+                            
+                            <div>
+                                <md-input-container style="width: auto">
+                                    <input placeholder="New Password" class="editinput" name="newpswd" type="password"  ng-model="socketctrl.newpswd" ng-minlength="8"  required><br>
+                                    <div ng-show="editpswdForm.newpswd.$dirty && editpswdForm.newpswd.$invalid" class="pswderror">
+                                        Please enter a new password, it must be at least 8 characters long.
+                                    </div>
+                                </md-input-container>
+                            </div>
+                            
+                            <div>
+                                <md-input-container style="margin-top:-18px; margin-bottom: -18px; width: auto">
+                                    <input placeholder="Confirm Password" class="editinput" name="confirmpswd" type="password" ng-model="socketctrl.confirmpswd" value-matches="socketctrl.newpswd" required><br>
+                                    <span ng-show="editpswdForm.confirmpswd.$dirty && editpswdForm.confirmpswd.$invalid" class="pswderror">
+                                        Please Enter The Same Password To Confirm.
+                                    </span>
+                                </md-input-container>
+                            </div><br>
+                            <div>
+                                <button type="submit" class="btn btn-success" ng-disabled="editpswdForm.$invalid" ng-click="enableEditor()">Save</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>            
+        </div>
+        <!-- settings end -->
+        
+        <!--Welcome Onload Window -->
+        
+        <div class="col-lg-7 col-md-7 col-sm-6 hidden-xs scrollbar" ng-show="showgroupinput === null">
+            <center>
+                <h1 style="text-transform:capitalize;color:rgba(39,49,66,0.6);">
+                    Welcome {{youName}}
+                </h1>
+                <br>
+            </center>
+        </div>
+        
+        <!-- end on Onload WIndow -->
+
+        <!-- OTO chat -->
+        
+        <div class="col-lg-7 col-md-7 col-sm-6 col-xs-12" ng-show="showgroupinput === 'otochat'">
+            <div class="row" style="margin-top:0px;">
+                <div class="col-lg-12 col-md-12 col-sm-12 info" layout="row">
+                    <md-button class="visible-xs md-icon-button fa fa-long-arrow-left" aria-label="backbutton" ng-click="ctrl = null; showgroupinput = null"></md-button>
+                    <span class="unames" ng-click="toggleSidenave()" style="cursor: pointer; font-size: 15px;">{{selectedUserFname}} </span>
+                    <span style="font-size: 10px;">{{selectedUserLastseen}}</span>
+                    <span ng-show="select == selectedUserName">{{typingindication}}</span>
+                    <span style="float: right;">
+                        <button ng-show="onlineindication == 'Online'" class="btn-link" ng-click="videoCall('video')"><img src="../images/lightvideo.png" alt="videocall"></button> 
+                        <button ng-show="onlineindication == 'Online'" class="btn-link" ng-click="videoCall('audio')"><img src="../images/lightaudio.png" alt="audiocall"></button>
+                        <button ng-show="onlineindication !== 'Online'" class="btn-link" ng-click="disableCall()"><img src="../images/lightvideo.png" alt="videocall"></button> 
+                        <button ng-show="onlineindication !== 'Online'" class="btn-link" ng-click="disableCall()"><img src="../images/lightaudio.png" alt="audiocall"></button> 
+                        <button class="clearbtn" ng-click="clearOtoChat(youName, selectedUserName)" ng-hide="displaymsg.length === 0">clear chat</button>
+                    </span>
+                    <span ng-hide="disablecallerror == null" class="alert alert-danger" style="color:red;">
+                        {{disablecallerror}}
+                    </span>
+                    <span ng-hide="notavailableforcall == null" class="alert alert-danger" style="color:red;">
+                        {{notavailableforcall}}
+                    </span>
+                </div>
+            </div>
+            <div class="row" id="msg" drop-on-me>
+                <div class="col-lg-12 col-md-12 col-sm-12 messages" scroll-to-bottom="displaymsg">
+                    <div style="min-width:100%;">
+                        <ul>
+                            <li ng-repeat="msg in displaymsg" >
+                                <div ng-class="(msg.me_user !== youName) ? 'received' :'sent'" class="msgstyle">
+                                    <div style="margin-top:10px;">
+                                        <img class="senderpic" ng-src="/uploads/profileimages/{{msg.me_pic}}">
+                                        <span style="font-size:12px;color:rgb(39,49,66);opacity:0.7;">{{msg.me_fname}}</span>
+                                        <i class="mst">{{msg.mst}}</i>
+                                    </div>
+                                    <span class="chatbubble">
+                                        <md-menu class="dropdown" ng-hide="msg.message === '///Deleted///' || msg.message == '***Call Ended***' || msg.message == '*/*/*Call Duration*/*/*' || msg.message == '***Call Rejected***'">
+                                            <button class="fa fa-angle-down" ng-click="$mdOpenMenu();aodconfoto(selectedUserName)" style="float: right;padding: 0px;background: none;border: none;"></button>
+                                            <md-menu-content ng-mouseleave="$mdMenu.close()">
+                                                <md-menu-item ng-hide="msg.me_user !== youName"><md-button ng-click= "delete(msg)">Delete</md-button></md-menu-item>
+                                                <md-menu-item><md-button ng-click="reply(msg.message,msg.attachment,msg.me_fname,msg.type)">Reply</md-button></md-menu-item>
+                                                <md-menu-item ng-hide="msg.attachment==null">
+                                                    <md-button ng-hide= "msg.me_user == youName || acceptordeclinefile == 'accept'" data-toggle="modal" data-target="#downloadModal" style="cursor: pointer;color: rgb(39,49,66);" ng-click="acceptDownload(msg.attachment,selectedUserName)">
+                                                        Download
+                                                    </md-button>
+                                                    <md-button aria-label="download" ng-hide="msg.attachment==null || msg.me_user !== youName" ng-href="/uploads/attachments/{{msg.attachment}}" target="_self" download>
+                                                        <i class="fa fa-download"></i>
+                                                    </md-button>
+                                                    <md-button aria-label="download" ng-hide="msg.attachment==null || msg.me_user == youName || acceptordeclinefile !== 'accept'" ng-href="/uploads/attachments/{{msg.attachment}}" target="_self" download>
+                                                        <i class="fa fa-download"></i>
+                                                    </md-button>
+                                                </md-menu-item>
+                                            </md-menu-content>
+                                        </md-menu>
+                                        <br>
+                                        <div ng-hide="msg.message==null">
+                                            <div>
+                                                <div style="color:black;background: #FFFEFB;border-radius: 5px;border-left: 4px solid #1f82dc; background-color: lightblue;" ng-hide="msg.reply === null || msg.reply === 'null' || msg.reply === ''">
+                                                    <b style="color: black">{{msg.fname}}</b> 
+                                                    <div>{{msg.reply}}</div>
+                                                </div>
+                                                <div ng-hide="msg.replyattachment === null || msg.replyattachment === 'null' || msg.replyattachment === ''" style="color:black;border-radius: 5px;border-left: 4px solid #1f82dc; background-color: lightblue;">
+                                                    <b style="color: black"> {{msg.fname}}</b>
+                                                    <div>
+                                                        <img ng-if="msg.replytype === 'image'" ng-src="/uploads/attachments/{{msg.replyattachment}}" alt="" style="height: 40px;width: 50px;">
+                                                        <span ng-if="msg.replytype === 'application' || msg.replytype === 'text'" class="fa fa-file-text-o" style="font-size:60px;"></span>
+                                                        <video ng-if="msg.replytype === 'video'" width="200" controls controlsList='nodownload'>
+                                                            <source ng-src="{{attachmentpath+msg.replyattachment }}">
+                                                        </video>
+                                                        <audio controls ng-if="msg.replytype === 'audio'" controlsList='nodownload'>
+                                                            <source ng-src="{{attachmentpath+msg.replyattachment }}">
+                                                        </audio>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <span ng-if="msg.message !== '///Deleted///' && msg.message !== '***Call Ended***' && msg.message !== '***Call Rejected***' && msg.callduration === 'NULL'">{{msg.message}}</span>
+                                            <span ng-if="msg.message === '///Deleted///'"><i>This message is Deleted</i></span>
+                                            <span ng-if="msg.message == '***Call Ended***'">
+                                                <span ng-if="msg.me_user === youName" style="text-transform: capitalize;">You Ended Call...
+                                                    <br>
+                                                    <span style="float: right">
+                                                        <span class="fa fa-video-camera" ng-click="videoCall('video')"></span> 
+                                                        <span class="fa fa-phone" ng-click="videoCall('audio')"></span>
+                                                    </span>
+                                                </span>
+                                                <span ng-if="msg.to_user === youName">You Missed Call From {{msg.me_user}}
+                                                    <br>
+                                                    <span style="float: right">
+                                                        <span class="fa fa-video-camera" ng-click="videoCall('video')"></span> 
+                                                        <span class="fa fa-phone" ng-click="videoCall('audio')"></span>
+                                                    </span>
+                                                </span>
+                                            </span>
+                                            <span ng-if="msg.message === '***Call Rejected***'" style="text-transform: capitalize;">
+                                                <span ng-if="msg.to_user === youName">{{msg.me_user}} Rejected Your Call...
+                                                    <br>
+                                                    <span style="float: right">
+                                                        <span class="fa fa-video-camera" ng-click="videoCall('video')"></span> 
+                                                        <span class="fa fa-phone" ng-click="videoCall('audio')"></span>
+                                                    </span>
+                                                </span>
+                                                <span ng-if="msg.me_user === youName">You Rejected Call From {{msg.to_user}}...
+                                                    <br>
+                                                    <span style="float: right">
+                                                        <span class="fa fa-video-camera" ng-click="videoCall('video')"></span> 
+                                                        <span class="fa fa-phone" ng-click="videoCall('audio')"></span>
+                                                    </span>
+                                                </span> 
+                                            </span>
+                                            <span ng-if="msg.callduration !== 'NULL'">
+                                                <span ng-if="msg.me_user === youName" style="text-transform: capitalize;">Call with {{msg.to_user}} ended
+                                                    <br>
+                                                    <span style="float: right">
+                                                        <span class="fa fa-video-camera" ng-click="videoCall('video')"></span> 
+                                                        <span class="fa fa-phone" ng-click="videoCall('audio')"></span>
+                                                    </span>
+                                                </span>
+                                                <span ng-if="msg.to_user === youName" style="text-transform: capitalize;">call with {{msg.me_user}} ended
+                                                    <br>
+                                                    <span style="float: right">
+                                                        <span class="fa fa-video-camera" ng-click="videoCall('video')"></span> 
+                                                        <span class="fa fa-phone" ng-click="videoCall('audio')"></span>
+                                                    </span>
+                                                </span>
+                                                <br><span style="font-size: 10px;">Call Duration: {{msg.callduration}}</span>
+                                            </span>
+                                        </div>
+                                        <div ng-hide="msg.attachment==null">
+                                            <img ng-if="msg.type === 'image'" ng-src="/uploads/attachments/{{msg.attachment}}" alt="" class="attachimg">
+                                            <span ng-if="msg.type === 'application' || msg.type === 'text'" class="fa fa-file-text-o" style="font-size:60px;"></span>
+                                            <video ng-if="msg.type === 'video'" width="200" controls controlsList='nodownload'>
+                                                <source ng-src="{{attachmentpath+msg.attachment }}">
+                                            </video>
+                                            <audio controls ng-if="msg.type === 'audio'" controlsList='nodownload'>
+                                                <source ng-src="{{attachmentpath+msg.attachment }}">
+                                            </audio>
+                                        </div>
+                                        <br>
+                                    </span>                                    
+                                </div><br>
+                            </li>
+                        </ul>
+                        <div style="display: none;">
+                            <video id="localVideo" autoplay muted></video>
+                            <video id="remoteVideo" autoplay></video>
+                            <button ng-click="endCall()">End</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12 inputfield">
+                    <div>{{errfile}}</div>
+                    <span>{{filesizeerror}}</span>                    
+                    <form name="inputForm" novalidate >
+                        <div class="replydiv" ng-hide= "replymessage == null || replymessage == 'null' || replymessage == ''|| replymessage == 'undefined'">
+                            <div class="replyname">
+                                <b>{{replyfname}}
+                                    <span ng-click="Cancelreply()" class="replyclose">X</span>
+                                </b>
+                            </div>
+                            <div style="padding:0px 0px 5px 8px; ">
+                                {{replymessage}} 
+                            </div>
+                        </div>
+                        <div class="replydiv" ng-hide= "replyattachment == null || replyattachment == 'null' || replyattachment == ''|| replyattachment == 'undefined'">
+                            <div class="replyname">
+                                <b>{{replyfname}}
+                                <span ng-click="Cancelreply()" class="replyclose">X</span>
+                                </b>
+                            </div>
+                            <div style="padding:0px 0px 5px 8px; ">
+                                <img ng-if="replytype === 'image'" ng-src="/uploads/attachments/{{replyattachment}}" alt="" style="height: 30px;width: 30px;">
+                                <span ng-if="replytype === 'application' || replytype === 'text'" class="fa fa-file-text-o" style="font-size:60px;"></span>
+                                <video ng-if="replytype === 'video'" width="200" controls controlsList='nodownload'>
+                                    <source ng-src="{{attachmentpath+replyattachment }}">
+                                </video>
+                                <audio controls ng-if="replytype === 'audio'" controlsList='nodownload'>
+                                    <source ng-src="{{attachmentpath+replyattachment }}">
+                                </audio>
+                            </div> 
+                        </div> 
+                        <md-input-container>
+                            <label>Type your message here</label>
+                            <input drop-on-me id="message" type="text" ng-disabled ="onlineindication == 'Do Not Disturb'" name="text" ng-change="typing()" ng-model="message" aria-label="message">
+                        </md-input-container>
+                        <md-button style="padding: 0px; min-height: 0px; min-width: 0px; line-height: 0px;" aria-label="sendmessage" ng-disabled="!message" type="submit" ng-click="sendMessage(message)"><img ng-src="../images/send.png" alt="send"></md-button>
+                        <!-- Message Popup -->
+                        <md-menu>
+                            <md-button ng-mouseenter="$mdOpenMenu()" aria-label="commenting"><img ng-src="../images/chat.png" alt="templates"></md-button>
+                            <md-menu-content ng-mouseleave="$mdCloseMenu()">
+                                <md-menu-item ng-repeat="popmsg in pmessages">
+                                    <md-button ng-click= "sendMessage(popmsg)">{{popmsg}}</md-button>
+                                </md-menu-item>
+                            </md-menu-content>
+                        </md-menu>
+                    
+                        <span class="select fileinput-button">
+                            <span><img ng-src="../images/pin.png" style="width: 20px; height: 20px;"></span>
+                            <input type="file" name="file"  file-model = "preattachment" multiple>
+                        </span>
+                        <!-- <button ng-show="onlineindication == 'Online'" class="btn-link" ng-click="videoCall('video')"><img src="../images/video.png" alt="videocall"></button> 
+                        <button ng-show="onlineindication == 'Online'" class="btn-link" ng-click="videoCall('audio')"><img src="../images/audio.png" alt="audiocall"></button>
+                        <button ng-show="onlineindication !== 'Online'" class="btn-link" ng-click="disableCall()"><img src="../images/video.png" alt="videocall"></button> 
+                        <button ng-show="onlineindication !== 'Online'" class="btn-link" ng-click="disableCall()"><img src="../images/audio.png" alt="audiocall"></button> -->
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- OTO chat ends -->
+
+        <!-- Group chat -->
+
+        <div class="col-lg-7 col-md-7 col-sm-6 col-xs-12" ng-show="showgroupinput === 'groupchat'">
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12 info" layout="row">
+                    <md-button class="visible-xs md-icon-button fa fa-long-arrow-left" aria-label="backbutton" ng-click="ctrl = null; showgroupinput = null"></md-button>
+                    <span class="unames" style="cursor: pointer;font-size: 15px;">{{groupname}}</span>
+                    <span ng-show="seletedgroup == groupname" >{{grptyping}}</span>
+                    <button ng-click="clearGroupChat(youName, uniquegroupname)" style="float: right;" class="clearbtn" ng-hide="displaygroupmsg.length === 0">clear chat</button>
+                </div>
+            </div>
+            <div class="row" id="gmsg" drop-on-me>
+                <div class="col-lg-12 col-md-12 col-sm-12 messages" scroll-to-bottom="displaygroupmsg">
+                    <div style="min-width:100%;">
+                        <ul>
+                            <li ng-repeat="msg in displaygroupmsg">
+                                <div ng-class="(msg.senderUsername !== youName) ? 'received' :'sent'" class="msgstyle">
+                                    <div style="margin-top:10px;">
+                                        <img class="senderpic" ng-src="/uploads/profileimages/{{msg.senderpic}}">
+                                        <span style="font-size:12px;color:rgb(39,49,66);opacity:0.7;">{{msg.senderfname}}</span>
+                                        <i class="mst">{{msg.mst}}</i>
+                                    </div>
+                                    <span class="chatbubble" style="padding-bottom: 15px;">
+                                        <md-menu class="dropdown" ng-hide="msg.message === '///Deleted///'">
+                                            <button class="fa fa-angle-down" ng-click="$mdOpenMenu();aodconf(msg.senderUsername)" style="float: right;padding: 0px;background: none;border: none;"></button>
+                                            <md-menu-content ng-mouseleave="$mdMenu.close()">
+                                                <md-menu-item><md-button ng-click="deleteGroup(msg)">Delete</md-button></md-menu-item>
+                                                <md-menu-item><md-button ng-click="replyGroup(msg.message,msg.attachment,msg.senderfname,msg.type)">Reply</md-button></md-menu-item>
+                                                <md-menu-item ng-hide="msg.attachment==null">
+                                                    <md-button ng-hide= "msg.senderUsername == youName || acceptordeclinefile == 'accept'" data-toggle="modal" data-target="#downloadModal" style="cursor: pointer;color: rgb(39,49,66);" ng-click="acceptDownload(msg.attachment, msg.senderUsername)">
+                                                        Download
+                                                    </md-button>
+                                                    <md-button aria-label="download" ng-hide="msg.attachment==null || msg.senderUsername !== youName" ng-href="/uploads/groupattachments/{{msg.attachment}}" target="_self" download>
+                                                        <i class="fa fa-download"></i>
+                                                    </md-button>
+                                                    <md-button aria-label="download" ng-hide="msg.attachment==null || msg.senderUsername == youName || acceptordeclinefile !== 'accept'" ng-href="/uploads/groupattachments/{{msg.attachment}}" target="_self" download>
+                                                        <i class="fa fa-download"></i>
+                                                    </md-button>
+                                                </md-menu-item>
+                                            </md-menu-content>
+                                        </md-menu>
+                                        <br>
+                                        <div ng-hide="msg.message==null">
+                                            <div style="color:black;">
+                                                <div style="color:black;background: #FFFEFB;border-radius: 5px;border-left: 4px solid #1f82dc; background-color: lightblue;" ng-hide="msg.replygroupmessage === null || msg.replygroupmessage === 'null' || msg.replygroupmessage === ''">
+                                                    <b>{{msg.replygroupfname}} </b>
+                                                    <div>{{msg.replygroupmessage}}</div>
+                                                </div>
+                                                <div ng-hide="msg.replygroupattachment === null || msg.replygroupattachment === 'null' || msg.replygroupattachment === ''" style="color:black;background: #FFFEFB;border-radius: 5px;border-left: 4px solid #1f82dc; background-color: lightblue;">
+                                                    <b>{{msg.replygroupfname}}</b>
+                                                    <div>
+                                                        <img ng-if="msg.replygrouptype === 'image'" ng-src="/uploads/groupattachments/{{msg.replygroupattachment}}" alt="" style="width:150px;height:150px;">
+                                                        <span ng-if="msg.replygrouptype === 'application' || msg.replygrouptype === 'text'" class="fa fa-file-text-o"></span>
+                                                        <video ng-if="msg.replygrouptype === 'video'" width="200" controls controlsList='nodownload'>
+                                                            <source ng-src="{{groupattachmentpath+msg.replygroupattachment }}">
+                                                        </video>
+                                                        <audio controls ng-if="msg.replygrouptype === 'audio'" controlsList='nodownload'>
+                                                            <source ng-src="{{groupattachmentpath+msg.replygroupattachment }}">
+                                                        </audio>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <span ng-hide="msg.message === '///Deleted///'">{{msg.message}}</span>
+                                            <span ng-show="msg.message === '///Deleted///'"><i>This message is Deleted</i></span>
+                                        </div> 
+                                        <span ng-hide="msg.attachment==null">
+                                            <img ng-if="msg.type === 'image'" ng-src="/uploads/groupattachments/{{msg.attachment}}" alt="" style="width:150px;height:150px; margin-bottom: 10px;">
+                                            <span ng-if="msg.type === 'application' || msg.type === 'text'" class="fa fa-file-text-o" style="font-size:60px; margin-bottom: 10px;"></span>
+                                            <video ng-if="msg.type === 'video'" width="200" controls controlsList='nodownload'>
+                                                <source ng-src="{{groupattachmentpath+msg.attachment }}">
+                                            </video>
+                                            <audio controls ng-if="msg.type === 'audio'" controlsList='nodownload'>
+                                                <source ng-src="{{groupattachmentpath+msg.attachment }}">
+                                            </audio>
+                                        </span>
+                                    </span>                                    
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12 inputfield">
+                    <div class="replydiv" ng-hide= "replygroupmessage == null || replygroupmessage == 'null' || replygroupmessage == ''|| replygroupmessage == 'undefined'">
+                        <div class="replyname">
+                            <b>{{replygroupfname}}
+                            <span ng-click="Cancelgroupreply()" class="replyclose">X</span> 
+                            </b> 
+                        </div>
+                        <div style="padding:0px 0px 5px 8px; ">
+                            {{replygroupmessage}}
+                        </div>
+                    </div> 
+                    <div class="replydiv" ng-hide= "replygroupattachment == null || replygroupattachment == 'null' || replygroupattachment == ''|| replygroupattachment == 'undefined'">
+                        <div class="replyname">
+                            <b>{{replygroupfname}}
+                            <span ng-click="Cancelgroupreply()" class="replyclose">X</span>
+                            </b>
+                        </div>
+                        <div style="padding:0px 0px 5px 8px; ">
+                        <img ng-if="replygrouptype === 'image'" ng-src="/uploads/groupattachments/{{replygroupattachment}}" alt="" style="height: 30px;width: 30px;">
+                        <span ng-if="replygrouptype === 'application' || replygrouptype === 'text'" class="fa fa-file-text-o" style="font-size:60px;height: 50px;"></span>
+                        <video ng-if="replygrouptype === 'video'" width="200" controls>
+                            <source ng-src="{{groupattachmentpath+replygroupattachment }}">
+                        </video>
+                        <audio controls ng-if="replygrouptype === 'audio'">
+                            <source ng-src="{{groupattachmentpath+replygroupattachment }}">
+                        </audio>
+                        </div>
+                    </div>
+                    <span>{{errfile}}</span>
+                    <span>{{filesizeerror}}</span>
+                    <form name="groupForm" novalidate ng-submit="groupmsg(gmsg)">
+                        <md-input-container>
+                            <label>Type your message here</label>
+                            <input drop-on-me id="groupmsg" type="text" name="text" ng-model="gmsg" ng-change="grouptyping()" aria-label="gmsg">
+                        </md-input-container>
+                        <md-button style="padding: 0px; min-height: 0px; min-width: 0px; line-height: 0px;"  type="btn btn-default" aria-label="sendgroupmessage" ng-disabled="!gmsg"><img ng-src="../images/send.png" alt="send"></md-button>
+
+                        <span class="select fileinput-button">
+                            <span><img ng-src="../images/pin.png" style="width: 20px; height: 20px;"></span>
+                            <input type="file" name="file"  file-model = "pregroupattachment" multiple>
+                        </span>
+
+                        <!-- Message Popup -->
+                        <md-menu>
+                            <md-button ng-mouseenter="$mdOpenMenu()" aria-label="commenting"><img ng-src="../images/chat.png" alt="templates"></md-button>
+                            <md-menu-content ng-mouseleave="$mdCloseMenu()">
+                                <md-menu-item ng-repeat="popmsg in pmessages">
+                                    <md-button ng-click= "groupmsg(popmsg)">{{popmsg}}</md-button>
+                                </md-menu-item>
+                            </md-menu-content>
+                        </md-menu>
+                    </form>
+                </div>
+            </div>
+        </div> 
+
+        <!-- Group Chat Ends -->
+
+        <!-- Share Files -->
+
+        <div class="col-lg-10 col-md-10 col-sm-9 col-xs-12 meeting-details" ng-show="showgroupinput === 'sharefiles' && ctrl ==='sharefiles'" style="background: #FFFEFB;">
+            <md-progress-linear value="{{uploadprogress}}"></md-progress-linear>
+            <md-input-container md-no-float="" style="width: 90%;">
+                <input type="text" ng-model="files" placeholder="Search" style="margin: -5px;">
+            </md-input-container>
+            <md-tabs md-dynamic-height="" md-border-bottom="" drop-on-me>
+                <md-tab label="Images">
+                    <div style="overflow-y: auto;height: 73vh;overflow-x: hidden;">
+                        <div style="padding: 10px;">
+                            <md-button class="md-raised" ng-click="activatecheckbox('image')" ng-hide="imageselecalltbtn === 'imageselecalltbtn'">{{checkboxselectimage}}</md-button>
+                            <md-button class="md-raised" ng-click="activateAllCheckboxes('image')" ng-show="showimagecheckbox === 'show'">All</md-button>
+                            <span class="selectfilemdbuttom">
+                                <md-button class="md-icon-button" ng-show="multipleshareimage === 'share'" aria-label="sharebutton" data-toggle="modal" data-target="#sharefile">
+                                    <img ng-src="../images/share.png"><br>
+                                </md-button>
+                                <md-button class="md-icon-button" ng-show="multipleshareimage === 'share'" aria-label="deletebutton" ng-click="removeMultipleFiles('image')">
+                                    <img ng-src="../images/delete.png"><br>
+                                </md-button>
+                            </span>
+                        </div>
+                        <md-grid-list md-cols-gt-md="5" md-cols-xs="3" md-cols-sm="4" md-row-height-sm="1:1" md-cols="4" md-cols-md="4" md-row-height-gt-md="4:4" md-row-height="4:4" md-gutter-gt-md="10px" md-gutter-md="10px" md-gutter="10px">
+                            <md-grid-tile ng-repeat="sf in shareFiles | filter: searchfiles" ng-mouseover="makeAsSeen(sf)" ng-if="sf.filetype === 'image'" ng-class="(sf.status == 'unseen') ? 'unseen' :'seen'" style="background: #FFFEFB;box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);">
+                                <div class="imageoverlay">
+                                    <img ng-src="/uploads/share/image/{{sf.file}}" alt="image" style="width: 100%; height: 100%">
+                                    <div class="overlay">
+                                        <span style="float: right; padding: 5px; margin-right: 10px;">
+                                            <md-button style="min-height: 0px; min-width: 0px;margin-top: -1px;" aria-label="imagedownload" class="btn btn-default fa fa-download" ng-href="/uploads/share/image/{{sf.file}}" target="_self" download></md-button>
+                                            <span class="fa fa-share" style="padding-right: 10px;" ng-show="multipleshareimage === null"  ng-click="selectedShareFile(sf)" data-toggle="modal" data-target="#sharefile"></span>
+                                            <span class="fa fa-trash-o" style="padding-right: 10px;" ng-show="multipleshareimage === null" ng-click="removeFile(sf); emptyArray('image')"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <md-grid-tile-footer style="padding: 10px; font-size: 12px;background: #fcb773;height: 40px;">
+                                    <div class="row">
+                                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                                            <md-checkbox md-no-ink class="imgCheckbox" ng-show="showimagecheckbox === 'show'" ng-checked="exists(sf)" aria-label="imgCheckbox" ng-click="multipleSelectGrid(sf)"></md-checkbox>
+                                        </div>
+                                        <div class="col-lg-10 col-md-10 col-sm-10 col-xs-10">
+                                            <div style="width: 100px;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;color: rgb(39,49,66);">
+                                                {{sf.originalname}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </md-grid-tile-footer>
+                            </md-grid-tile>
+                        </md-grid-list>
+                        <br>
+                    </div>
+                </md-tab>
+                <md-tab label="Documents">
+                    <div style="overflow-y: auto;height: 73vh;overflow-x: hidden;">
+                        <div style="padding: 10px;">
+                            <md-button class="md-raised" ng-click="activatecheckbox('application')" ng-hide="docselectallbtn === 'docselectallbtn'">{{checkboxselectdoc}}</md-button>
+                            <md-button class="md-raised" ng-click="activateAllCheckboxes('application')" ng-show="showdoccheckbox === 'show'">All</md-button>
+                            <span class="selectfilemdbuttom">
+                                <md-button class="md-icon-button" ng-show="multiplesharedoc === 'share'" aria-label="sharebutton" data-toggle="modal" data-target="#sharefile">
+                                    <img ng-src="../images/share.png"><br>
+                                </md-button>
+                                <md-button class="md-icon-button" ng-show="multiplesharedoc === 'share'" aria-label="deletebutton" ng-click="removeMultipleFiles('application')">
+                                    <img ng-src="../images/delete.png"><br>
+                                </md-button>
+                            </span>
+                        </div>
+                        <div ng-repeat="sf in shareFiles | filter: searchfiles" ng-mouseover="makeAsSeen(sf)" ng-if="sf.filetype === 'application' || sf.filetype === 'text'" ng-class="(sf.status == 'unseen') ? 'unseen' :'seen'" style="padding: 8px;" class="filehover row">
+                            <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1" ng-show="showdoccheckbox === 'show'">
+                                <md-checkbox class="docCheckbox" ng-checked="exists(sf)" aria-label="docCheckbox" ng-click="multipleSelectGrid(sf)"></md-checkbox>
+                            </div>
+                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                <div style="width: 400px;white-space: nowrap; display: inline-block;overflow: hidden;text-overflow: ellipsis;color: rgb(39,49,66);">
+                                    {{sf.originalname}}
+                                </div>
+                                <div style="font-size: 10px; color: rgb(39,49,66)">
+                                    <b>Uploaded By:</b>
+                                    <span ng-show="sf.uploaderusername === youName">you<b style="padding-left: 5px;">On:</b>{{sf.fst | date:"MMM d, y h:mm:ss a"}}</span>
+                                    <span ng-show="sf.uploaderusername !== youName">{{sf.uploadername}}</span>
+                                    <span ng-show="sf.tousername === youName">
+                                        <b style="padding-left: 5px;">Shared By:</b>{{sf.fromname}}
+                                        <b style="padding-left: 5px;">On:</b>{{sf.fst | date:"MMM d, y h:mm:ss a"}}
+                                    </span>
+                                </div>
+                            </div>
+                            <section layout="row" layout-wrap="">
+                                <md-button aria-label="documentdownload" class="fileoptions md-icon-button fa fa-download" ng-href="/uploads/share/file/{{sf.file}}" target="_self" download></md-button>
+                                <md-button aria-label="documentshare" ng-show="multiplesharedoc === null" class="fa fa-share fileoptions md-icon-button" ng-click="selectedShareFile(sf)" data-toggle="modal" data-target="#sharefile"></md-button>
+                                <md-button aria-label="documenttrash" ng-show="multiplesharedoc === null" class="fa fa-trash-o fileoptions md-icon-button" ng-click="removeFile(sf); emptyArray('application')"></md-button>
+                            </section>
+                        </div>
+                        <br>
+                    </div>
+                </md-tab>
+                <md-tab label="Audio Files">
+                    <div style="overflow-y: auto;height: 73vh;overflow-x: hidden;">
+                        <div style="padding: 10px;">
+                            <md-button class="md-raised" ng-click="activatecheckbox('audio')" ng-hide="audioselectallbtn === 'audioselectallbtn'">{{checkboxselectaudio}}</md-button>
+                            <md-button class="md-raised" ng-click="activateAllCheckboxes('audio')" ng-show="showaudiocheckbox === 'show'">All</md-button>
+                            <span class="selectfilemdbuttom">
+                                <md-button class="md-icon-button" ng-show="multipleshareaudio === 'share'" aria-label="sharebutton" data-toggle="modal" data-target="#sharefile">
+                                    <img ng-src="../images/share.png"><br>
+                                </md-button>
+                                <md-button class="md-icon-button" ng-show="multipleshareaudio === 'share'" aria-label="deletebutton" ng-click="removeMultipleFiles('audio')">
+                                    <img ng-src="../images/delete.png"><br>
+                                </md-button>
+                            </span>
+                        </div>
+                        <div ng-repeat="sf in shareFiles | filter: searchfiles" ng-mouseover="makeAsSeen(sf)" ng-if="sf.filetype === 'audio'" class="filehover row" ng-class="(sf.status == 'unseen') ? 'unseen' :'seen'" style="overflow-y: auto">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                <md-slider-container>
+                                    <md-checkbox ng-show="showaudiocheckbox === 'show'" class="audioCheckbox" ng-checked="exists(sf)" aria-label="docCheckbox" ng-click="multipleSelectGrid(sf)"></md-checkbox>
+                                    <audio id="{{sf.originalname}}" style="display: none"><source ng-src="{{audiopath+sf.file}}"></audio>
+                                    <span ng-init="sf.playorpausebtn = 'Play';sf.currenttime= 0;sf.muteaudio = 'Mute';intializeAudio(sf.originalname)" style="display: inline-block;;width: 400px;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;color: rgb(39,49,66);padding-right: 30px;">
+                                        {{sf.originalname}}<br>
+                                        <span style="font-size: 10px;color: rgb(39,49,66)">
+                                            <b>Uploaded By:</b>
+                                            <span ng-show="sf.uploaderusername === youName">you<b style="padding-left: 5px;">On:</b>{{sf.fst | date:"MMM d, y h:mm:ss a"}}</span>
+                                            <span ng-show="sf.uploaderusername !== youName">{{sf.uploadername}}</span>
+                                            <span ng-show="sf.tousername === youName">
+                                                <b style="padding-left: 5px;">Shared By:</b>{{sf.fromname}}
+                                                <b style="padding-left: 5px;">On:</b>{{sf.fst | date:"MMM d, y h:mm:ss a"}}
+                                            </span>
+                                        </span>
+                                    </span>
+                                    <md-button class="md-icon-button" ng-click="playorpauseAudio(sf.originalname)" aria-label="{{sf.originalname}}">
+                                        <span ng-show="sf.playorpausebtn == 'Play'" class="fa fa-play"></span>
+                                        <span ng-show="sf.playorpausebtn == 'Pause'" class="fa fa-pause"></span>
+                                    </md-button>
+                                    <md-slider ng-model="sf.currenttime" min="0" max="{{sf.sliderlength}}" aria-label="sf.currenttime" class="md-primary" ng-change="updateTym(sf.originalname)" ng-click="updateTym(sf.originalname)"></md-slider>
+                                    <div>{{sf.currenttime | number:0 | myDateFilter}}/{{sf.sliderlength | number:0 | myDateFilter}}</div>
+                                    <md-button class="md-icon-button" ng-click="muteAudio(sf.originalname)" aria-label="sf.originalname">
+                                        <span ng-show="sf.muteaudio == 'Mute'" class="fa fa-volume-up"></span>
+                                        <span ng-show="sf.muteaudio == 'Unmute'" class="fa fa-volume-off"></span>
+                                    </md-button>
+                                    <md-button aria-label="filesdownload" class="md-icon-button fa fa-download fileoptions" ng-href="/uploads/share/audio/{{sf.file}}" target="_self" download></md-button>
+                                    <md-button ng-show="multipleshareaudio === null" class="md-icon-button fa fa-share fileoptions" aria-label="fa-share" ng-click="selectedShareFile(sf)" data-toggle="modal" data-target="#sharefile"></md-button>
+                                    <md-button ng-show="multipleshareaudio === null" class="md-icon-button fa fa-trash-o fileoptions" aria-label="fa-trash-o" ng-click="removeFile(sf); emptyArray('audio')"></md-button>
+                                </md-slider-container>
+                            </div>
+                        </div>
+                        <br>
+                    </div>
+                </md-tab>
+                <md-tab label="Video Files">
+                    <div style="overflow-y: auto;height: 73vh;overflow-x: hidden;">
+                        <div style="padding: 10px;">
+                            <md-button class="md-raised" ng-click="activatecheckbox('video')" ng-hide="videoselectallbtn === 'videoselectallbtn'">{{checkboxselectvideo}}</md-button>
+                            <md-button class="md-raised" ng-click="activateAllCheckboxes('video')" ng-show="showvideocheckbox === 'show'">All</md-button>
+                            <span class="selectfilemdbuttom">
+                                <md-button class="md-icon-button" ng-show="multiplesharevideo === 'share'" aria-label="sharebutton" data-toggle="modal" data-target="#sharefile">
+                                    <img ng-src="../images/share.png"><br>
+                                </md-button>
+                                <md-button class="md-icon-button" ng-show="multiplesharevideo === 'share'" aria-label="deletebutton" ng-click="removeMultipleFiles('video')">
+                                    <img ng-src="../images/delete.png"><br>
+                                </md-button>
+                            </span>
+                        </div>
+                        <md-grid-list md-cols-gt-md="5" md-cols-xs="3" md-cols-sm="4" md-row-height-sm="1:1" md-cols="4" md-cols-md="4" md-row-height-gt-md="4:4" md-row-height="4:4" md-gutter-gt-md="10px" md-gutter-md="10px" md-gutter="10px">
+                            <md-grid-tile ng-repeat="sf in shareFiles | filter: searchfiles" ng-mouseover="makeAsSeen(sf)" ng-if="sf.filetype === 'video'" ng-class="(sf.status == 'unseen') ? 'unseen' :'seen'" class="gridTile imageoverlay" style="background: #FFFEFB;box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);">
+                                <div>
+                                    <video style="margin-top: -30px;width:100%; height: auto" controls>
+                                        <source ng-src="{{videopath+sf.file}}">
+                                    </video>
+                                </div>
+                                <div class="overlay">
+                                    <span style="float: right; padding: 5px; margin-right: 10px;">
+                                        <md-button style="min-height: 0px; min-width: 0px;margin-top: -1px;" aria-label="videodownload" class="btn btn-default fa fa-download" ng-href="/uploads/share/video/{{sf.file}}" target="_self" download></md-button>
+                                        <span class="fa fa-share" style="padding-right: 10px;" ng-show="multiplesharevideo === null"  ng-click="selectedShareFile(sf)" data-toggle="modal" data-target="#sharefile"></span>
+                                        <span class="fa fa-trash-o" style="padding-right: 10px;" ng-show="multiplesharevideo === null" ng-click="removeFile(sf); emptyArray('video')"></span>
+                                    </span>
+                                </div>
+                                <md-grid-tile-footer style="padding: 10px; font-size: 12px;background: #fcb773;height: 40px;">
+                                    <div class="row">
+                                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                                            <md-checkbox md-no-ink="" class="videoCheckbox" ng-show="showvideocheckbox === 'show'" ng-checked="exists(sf)" aria-label="videoCheckbox" ng-click="multipleSelectGrid(sf)"></md-checkbox>
+                                        </div>
+                                        <div class="col-lg-10 col-md-10 col-sm-10 col-xs-10">
+                                            <div style="width: 100px;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;color: rgb(39,49,66);">
+                                                {{sf.originalname}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </md-grid-tile-footer>
+                            </md-grid-tile>
+                        </md-grid-list>
+                        <br>
+                    </div>    
+                </md-tab>
+            </md-tabs>
+            <div class="uploadbtn">
+                <md-button aria-label="uploadbutton" class="md-fab md-raised" style="background: #00e600;">
+                    <label for="sel"><img src="../images/upload.png" alt="image"></label>
+                </md-button>
+                <input id="sel" style="display: none" class="file-input" type="file" name="file" title=" " file-model="sharefile" multiple>
+            </div>
+        </div>
+        
+        <!-- Share Files Ends -->
+
+        <!-- Create Meeting -->
+
+        <div class="col-lg-7 col-md-7 col-sm-6 col-xs-12 meeting-details" ng-show="showgroupinput === 'createMeeting'">
+            <div class="row" style="margin-top:0px;">
+                <div class="col-lg-12 col-md-12 col-sm-12 info" layout="row">
+                    <md-button class="visible-xs md-icon-button fa fa-long-arrow-left" aria-label="backbutton" ng-click="ctrl = 'meeting'; showgroupinput = null"></md-button>
+                    <div class="unames">Schedule Your Meeting</div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="background: #FFFEFB; padding-top: 20px; height: inherit; overflow-y: auto;">
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 col-sm-12">
+                            <form name="meetform">
+                                <div>
+                                    <md-input-container class="md-block">
+                                        <label>Agenda</label>
+                                        <input type="text" required name="meetname" ng-model="meetsubject">
+                                        <div ng-messages="meetform.meetsubject.$error">
+                                            <div ng-message="required">This is required.</div>
+                                        </div>
+                                    </md-input-container>
+                                </div>
+                                <div>
+                                    <md-input-container class="md-block">
+                                        <label>Description</label>
+                                        <textarea aria-label="description" class="froalaeditortomeeting" required name="description" ng-model="description"></textarea>
+                                        <div ng-messages="meetform.description.$error">
+                                            <div ng-message="required">This is required.</div>
+                                        </div>
+                                    </md-input-container>
+                                </div>
+                                <div>
+                                    <md-input-container>
+                                        <label>Meeting Type</label>
+                                        <md-select ng-model="selectedMeetingItem" aria-label="selectedMeetingItem" md-container-class="mySelect" required>
+                                            <md-optgroup label="meetingType">
+                                            <md-option ng-click="getSelectedMeetingType(m)" ng-enter="getSelectedMeetingType(m)" ng-value="m" ng-repeat="m in meetingType">{{m}}</md-option>
+                                            </md-optgroup>
+                                        </md-select>
+                                    </md-input-container>
+                                </div>
+                                <br>
+                                <div class="row">
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-4">
+                                        <md-datepicker id="datepicker" ng-model="meetingdate" md-min-date="meetingdate" md-placeholder="Enter date" md-open-on-focus></md-datepicker>
+                                        <span>{{meetingdate | date: "dd:MM:yyyy"}}</span>
+                                    </div>
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-8">
+                                        <mdp-time-picker id="timepicker" ng-model="meetingtime" mdp-auto-switch="true" ng-change="validateTime(meetingtime)"><span style="position: absolute;margin-top: -10px;width: 60px;">{{meetingtime | date: "hh:mm a"}}</span></mdp-time-picker>
+                                    </div>
+                                    <div style="color: red;padding-left: 15px;">{{disableddateerror}}</div>
+                                </div>
+                                <div>
+                                    <div style= "color: rgba(39,49,66,0.7);">Add Members For Meeting</div>
+                                    <select class="meetmembers" multiple="multiple" style="width:60%;" ng-model="option" required>
+                                        <option ng-repeat="user in meetingusers" value="{{user.uname}}" ng-if="user.uname !== youName">
+                                            {{user.uname}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <br>
+                                <div>
+                                    <span class="select fileinput-button">
+                                        <div style="color: red;">{{filesizeerror}}</div>
+                                        <div style="color: red;">{{errfile}}</div>
+                                        <span>Attach File</span>
+                                        <span class="fa fa-paperclip"></span>
+                                        <input type="file" name="file"  file-model = "premeetingattachment" ><span>{{displyattachment}}</span>
+                                    </span>
+                                </div>
+                                <br>
+                                <div>
+                                    <button type="button" class="btn btn-success" id="reset" ng-disabled="meetform.$invalid" ng-click='meetingdata(meetform,youName,meetsubject,meetingdate,meetingtime,option,premeetingattachment,selectedMeetingItem);'>Save</button>
+                                    <button type="button" class="btn btn-success" ng-disabled="meetform.$invalid" ng-click='meetingdatamails(meetform,youName,meetsubject,meetingdate,meetingtime,option,premeetingattachment,selectedMeetingItem)'>Save And Sendmail</button>
+                                </div>
+                                <br>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> 
+             
+        <!-- end of meeting creation div -->
+        
+        <!-- show meeting details div -->
+
+        <div class="col-lg-7 col-md-7 col-sm-6 col-xs-12 meeting-details" ng-show="showgroupinput === 'meetings'" style="background: #FFFEFB;font-size:14px;color: rgba(39,49,66,1);">
+            <md-button class="visible-xs md-icon-button fa fa-long-arrow-left" aria-label="backbutton" ng-click="ctrl = 'meeting'; showgroupinput = null"></md-button>
+            <md-tabs md-dynamic-height="" md-border-bottom="" md-selected="resetmdtab">
+                <md-tab label="Meeting Information">
+                    <div class="container-fluid">
+                        <div class="row" ng-show="showAccRej == 'Accepted' && meetadmin !== youName">
+                            <div  class="col-lg-12 col-md-12 col-sm-12"  style="background: #16b03f;color: #FFFEFB;height:30px;">You Accepted This Meeting</div>
+                        </div>
+                        <div class="row" ng-show="showAccRej == 'Declined' && meetadmin !== youName">
+                            <div  class="col-lg-12 col-md-12 col-sm-12"  style="color: #FFFEFB;background: #be1f22;height:30px;">You Declined This Meeting</div>
+                        </div>
+                        <div class="row" ng-show="showAccRej == 'Proposed' && meetadmin !== youName">
+                            <div  class="col-lg-12 col-md-12 col-sm-12"  style="color: #FFFEFB;background: #1f82dc;height:30px;">You Proposed Particular Time For This Meeting</div>
+                        </div>
+                        <div style="font-size:20px; margin-top: 10px;">Hi,
+                            <span style="text-transform: capitalize;">{{youName}}</span>
+                        </div><br><br>
+                        <div ng-hide="meetadmin == youName">
+                            <label style="text-transform: capitalize;">{{meetadmin}} </label><span> has invited you to join this online meeting</span>
+                        </div>
+                            
+                        <div ng-show="meetadmin== youName">
+                            <label style="text-transform: capitalize;color: #2ccc7c;">You Organised this meeting. </label><span></span>
+                        </div>
+                        <br>
+                            
+                        <div style="border-left: 6px solid #1f82dc;">
+                            <div style="margin-left: 20px;">
+                                <div>
+                                    <label>Meeting Type: </label>
+                                    <span style="text-transform: capitalize;">{{meetingtype}}</span>
+                                </div>
+                                <div> 
+                                    <label>Time: </label> <span>{{date}}, {{time}}</span>
+                                </div>
+                                <!-- <br> -->
+                                <div>
+                                    <label>Presenter: </label><span style="text-transform: capitalize;"> {{meetadmin}}</span>
+                                </div>
+                                <!-- <br> -->
+                                <div>
+                                    <label>Agenda: </label>
+                                    <span style="text-transform: capitalize;">{{meetingsubject}}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                        <div>
+                            <label>Members in meeting: </label>
+                            <span ng-repeat="member in meetmembers">
+                                {{member.membersinmeet}}<span ng-hide="$last">,</span>
+                            </span>
+                        </div>
+                        <div>
+                            <label>Details: </label>
+                            <div ng-bind-html="meetingdescription"></div>
+                        </div>
+                        <div ng-hide="meetingattachment == 'NULL' || meetingattachment == null">
+                            <span>{{meetingattachment}}</span>
+                            <a aria-label="download" ng-href="/uploads/meetingattachments/{{meetingattachment}}" target="_self" download>
+                               <span> Download</span>
+                            </a>
+                        </div>
+                        <br>
+                        <div ng-hide="meetadmin == youName || showAccRej !== null">
+                            <button type="button" class="btn" style="background: #16b03f;color: #FFFEFB;border-radius:5px;" ng-click="acceptMeeting(youName)">
+                                Accept
+                            </button>
+                            <button type="button" class="btn" style="background: #e62428;color: #FFFEFB;border-radius:5px;margin-left:15px;" ng-click="toggle()">
+                                Decline
+                            </button>
+                            <button type="button" ng-disabled="reject" class="btn" style="background: #1f82dc;color: #FFFEFB;border-radius:5px;margin-left:15px;" ng-click="proposedTime()">
+                                Proposed Time
+                            </button>
+                            <br><br>
+                            <div ng-show="reject">
+                                <textarea style="width: 50%;font-size: 13px;height: 15%;" ng-model="reason"></textarea>
+                                <button type="button" ng-click="declineMeeting(reason,youName);toggle()">send</button>
+                                <button ng-click="toggle()">cancel</button>
+                            </div>
+                            
+                            <div ng-show="protime" > 
+                                <div>
+                                    <md-datepicker ng-model="proposedDate" md-placeholder="Enter date" md-min-date="today" md-open-on-focus required></md-datepicker>
+                                    <span>{{proposedDate | date: "dd:MM:yyyy"}}</span>
+                                </div>
+                                <div flux-gt-xs style="margin-top:-15px;padding-left:7px;">
+                                    <mdp-time-picker ng-model="proposeTime" id="timepicker" mdp-auto-switch="true"  required >
+                                        <span style="padding-left: 20px;">{{proposeTime | date: "hh:mm a"}}</span>
+                                    </mdp-time-picker>
+                                </div>
+                                <button type="button" ng-click='proposedTimeData(proposedDate,proposeTime,youName);' style="background: #16b03f;color: #FFFEFB;border-radius: 5px;border:none;height:40px;margin-right: 10px;">send</button>
+                                <button ng-click="proposedTime()" style="background: #e62428;color: #FFFEFB;border-radius: 5px;border-color: #e62428;border:none;height:40px;">cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </md-tab>
+                <md-tab label="Minutes of Meeting" ng-click="momStatusAsSeen()">
+                    <div class="Container-fluid">
+                        <div class="row" style="border-bottom: 1px solid rgba(39,49,66,0.1)" ng-show="meetadmin === youName && hideAOIform == null">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                <button class="btn btn-default" id="clearcancleAOIdata" ng-show="hidesave === 'hidesave'" ng-click="cancleAOI(AOIform)"  style="border: none; outline: none; padding: 2px 5px; color: red; float: right; margin-right: 20px;">X</button>
+                                <form style="margin-top: 20px;" name="AOIform">
+                                    <div class="row" style="padding-left:10px; padding-right:10px;">
+                                        <div class="col-lg-8 col-md-9 col-sm-12 col-xs-12">
+                                            <md-input-container class="md-block">
+                                                <label>Action</label>
+                                                <textarea ng-model="AOIpoint" md-maxlength="150"></textarea>
+                                            </md-input-container>
+                                        </div>
+                                        <div class="col-lg-4 col-md-3 col-sm-11 col-xs-11">
+                                            <label>Assign To</label>
+                                            <select class="meetmembers" id="A" multiple="multiple" ng-model="AOItopersons">
+                                                <option ng-repeat="meetmember in meetmembers" value="{{meetmember.membersinmeet}}" ng-if="meetmember.membersinmeet !== youName">
+                                                    {{meetmember.membersinmeet}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                                            <md-input-container>
+                                                <label>Work Stream</label>
+                                                <md-select ng-model="workstreammodel" aria-labelledby="workstreammodel" required>
+                                                    <md-optgroup label="workstream">
+                                                    <md-option ng-repeat="work in workstream" ng-click="" ng-value="work">{{work}}</md-option>
+                                                    </md-optgroup>
+                                                </md-select>
+                                            </md-input-container>
+                                        </div>
+                                        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+                                            <md-input-container>
+                                                <label>Priority</label>
+                                                <md-select ng-model="prioritymodel" aria-labelledby="prioritymodel" required>
+                                                    <md-optgroup label="priority">
+                                                    <md-option ng-repeat="pre in prioritylist" ng-click="" ng-value="pre">{{pre}}</md-option>
+                                                    </md-optgroup>
+                                                </md-select>
+                                            </md-input-container>
+                                        </div>
+                                        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+                                            <md-datepicker id="datepicker" ng-model="AOIdate" md-min-date="meetingdate" md-placeholder="Enter date"  aria-label="datepickermd" md-open-on-focus></md-datepicker>
+                                            <span>{{AOIdate | date: "dd:MM:yyyy"}}</span>
+                                        </div>
+                                        <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
+                                            <button class="btn btn-success" id="clearAOIdata" ng-hide="hidesave === 'hidesave'" ng-disabled="AOIform.$invalid" ng-click="actionofitem(AOIform,AOIpoint,AOItopersons,workstreammodel,prioritymodel,AOIdate)">save</button>
+                                            <button class="btn btn-info" id="clearupdateAOIdata" ng-show="hidesave === 'hidesave'" ng-disabled="AOIform.$invalid" ng-click="updateAOI(AOIform,editobj,AOIpoint,AOItopersons,workstreammodel,prioritymodel,AOIdate)">Update</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-12 col-md-12 hidden-xs hidden-sm">
+                                <table id="AOItable" ng-hide="actionofitemslist.length === 0">
+                                    <tr style="background: rgba(39,49,66,0.1);">
+                                        <th style="width: 1%">Sn</th>
+                                        <th style="width: 50%">Action item</th>
+                                        <th style="width: 10%">Assigned to</th>
+                                        <th style="width: 10%">Due Date</th>
+                                        <th style="width: 5%">Status</th>
+                                        <th style="width: 15%;">Remind</th>
+                                        <th style="width: 9%" ng-show="meetadmin === youName && hideAOIeditbtn == null"></th>
+                                    </tr>
+                                    <tr ng-repeat=" AOI in actionofitemslist">
+                                        <td></td>
+                                        <td style="font-size: 12px; color: rgba(39,49,66,0.7);">
+                                            <div id="actionpoint" style="font-size: 15px; color: rgb(39,49,66);">{{AOI.point}}</div>
+                                            <div><b>Meeting:</b> {{meetingsubject}}</div>
+                                            <div><b>Workstream:</b> {{AOI.workstream}}, <b>Priority:</b> {{AOI.priority}}</div>
+                                            <div ng-show="meetadmin == youName" style="color: orange">
+                                                <b>Member Status: </b>
+                                                <span ng-if="AOI.memberstatus == null">---</span>
+                                                <span>{{AOI.memberstatus}}</span>
+                                            </div>
+                                            <div ng-show="meetadmin !== youName" style="color: orange"><b>Admin Status: </b>{{AOI.adminstatus}}</div>
+                                        </td>
+                                        <td><div ng-repeat="a in AOI.assignedto">{{a}}<span ng-hide="$last">,</span></div></td>
+                                        <td style="font-size:12px;">{{AOI.pcdate | date: d/mm/Y}}</td>
+                                        <td ng-if="meetadmin == youName">
+                                            <md-select ng-model="AOI.adminstatus" aria-label="adminStatus" placeholder="{{AOI.adminstatus}}">
+                                                <md-optgroup>
+                                                <md-option ng-repeat="sAOI in statusAOIadmin" ng-value="sAOI" class="btnlog" ng-click="updateAdminStatus(sAOI,AOI)">{{sAOI}}</md-option>
+                                                </md-optgroup>
+                                            </md-select>
+                                        </td>
+                                        <td ng-if="meetadmin !== youName">
+                                            <md-select ng-model="AOI.memberstatus" aria-label="memberStatus" placeholder="{{AOI.memberstatus}}" ng-disabled="AOI.disablemdselect === 'disable'">
+                                                <md-optgroup label="status">
+                                                <md-option ng-repeat="sAOI in statusAOImember" ng-value="sAOI" class="btnlog" ng-click="updateMemberStatus(sAOI, AOI)">{{sAOI}}</md-option>
+                                                </md-optgroup>
+                                            </md-select>
+                                        </td>
+                                        <td class="datetimepicker" style="font-size:12px;">
+                                            <span ng-hide="AOI.disablemdselect === 'disable'">
+                                                <md-input-container ng-hide ="AOI.hidedatepickerone == 'hidedatepicker'">
+                                                    <input mdc-datetime-picker="" aria-label="datetimepicker" date="true" time="true" type="text"
+                                                    show-todays-date="" minutes="true" min-date="dateformdpickerinmeeting" show-icon="true"
+                                                    ng-model="dateTime" ng-change="reminderAOI(dateTime,AOI)">
+                                                </md-input-container>
+                                                <md-input-container ng-hide ="AOI.hidedatepickerone !== 'hidedatepicker'">
+                                                    <input mdc-datetime-picker="" aria-label="datetimepicker" date="true" time="true" type="text"
+                                                    show-todays-date="" minutes="true" min-date="dateformdpickerinmeeting" show-icon="true"
+                                                    ng-model="dateTime" ng-change="updateReminderAOI(dateTime,AOI)">
+                                                </md-input-container>
+                                                <br>
+                                                <span>{{dateTime | date: "d MMM,y  hh:mm a "}}</span>
+                                                <span ng-show="dateTime == null">{{AOI.remindertime | date: "d MMM,y  hh:mm a "}}</span>
+                                            </span>
+                                        </td>
+                                        <td ng-show="meetadmin === youName && hideAOIeditbtn == null"><button class="btn btn-info" ng-click="editAOI(AOI)">Edit</button></td>
+                                    </tr>
+                                </table>
+                                <br>
+                                <div ng-show="meetadmin === youName && hideAOIsharebtn == null && disablereminderselect == true">
+                                    <span style="font-size: 10px;">Once you share the MOM you will not be able to edit the notes</span>
+                                    <button ng-click="shareAOI()" class="btn btn-success" style="margin-left:20px;" ng-hide="actionofitemslist.length === 0">Share</button>
+                                    <button ng-click="shareAOIMail()" class="btn btn-success" style="margin-left:20px;" ng-hide="actionofitemslist.length === 0">Share & Mail</button>
+                                </div>
+                                <br>
+                            </div>
+
+                            <div class="col-sm-12 col-xs-12 hidden-lg hidden-md" ng-hide="actionofitemslist.length === 0">
+                                <div class="row AOIrow" ng-repeat=" AOI in actionofitemslist">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="meetadmin === youName && hideAOIeditbtn == null">
+                                        <button class="btn fa fa-pencil-square-o editbtn" ng-click="editAOI(AOI)"></button>
+                                    </div>
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 action"><b>Action Item: </b>{{AOI.point}}</div>
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12"><b>Meeting:</b> {{meetingsubject}}</div>
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12"><b>Workstream:</b> {{AOI.workstream}}, <b>Priority:</b> {{AOI.priority}}</div>
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <b>Assigned To</b>
+                                        <span ng-repeat="a in AOI.assignedto">{{a}}<span ng-hide="$last">,</span></span>
+                                    </div>
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="meetadmin == youName" style="color: orange">
+                                        <b>Member Status: </b>
+                                        <span ng-if="AOI.memberstatus == null">---</span>
+                                        <span>{{AOI.memberstatus}}</span>
+                                    </div>
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="meetadmin !== youName" style="color: orange"><b>Admin Status: </b>{{AOI.adminstatus}}</div>
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <b>Due Date: </b>{{AOI.pcdate | date: d/mm/Y}}
+                                    </div>
+                                    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2"><b>Status:</b></div>
+                                    <div class="col-lg-10 col-md-10 col-sm-10 col-xs-10 statusAoi" style="padding-left:10px;" ng-if="meetadmin == youName">
+                                        <md-select ng-model="AOI.adminstatus" aria-label="adminStatus" placeholder="{{AOI.adminstatus}}">
+                                            <md-optgroup>
+                                            <md-option ng-repeat="sAOI in statusAOIadmin" ng-value="sAOI" class="btnlog" ng-click="updateAdminStatus(sAOI,AOI)">{{sAOI}}</md-option>
+                                            </md-optgroup>
+                                        </md-select>
+                                    </div>
+                                    <div class="col-lg-10 col-md-10 col-sm-10 col-xs-10 statusAoi" style="padding-left:10px;" ng-if="meetadmin !== youName">
+                                        <md-select ng-model="AOI.memberstatus" aria-label="memberStatus" placeholder="{{AOI.memberstatus}}" ng-disabled="AOI.disablemdselect === 'disable'">
+                                            <md-optgroup label="status">
+                                            <md-option ng-repeat="sAOI in statusAOImember" ng-value="sAOI" class="btnlog" ng-click="updateMemberStatus(sAOI, AOI)">{{sAOI}}</md-option>
+                                            </md-optgroup>
+                                        </md-select>
+                                    </div>
+                                    
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <div style="margin-top: -20px;">
+                                            <span class="datetimepicker">
+                                                <span ng-hide="AOI.disablemdselect === 'disable'">
+                                                    <div>
+                                                        <b>Set Reminder: </b>
+                                                    </div> 
+                                                    <div style="margin-top: -10px;">
+                                                        <md-input-container ng-hide ="AOI.hidedatepickerone == 'hidedatepicker'">
+                                                            <input mdc-datetime-picker="" aria-label="datetimepicker" date="true" time="true" type="text"
+                                                            show-todays-date="" minutes="true" min-date="dateformdpickerinmeeting" show-icon="true"
+                                                            ng-model="dateTime" ng-change="reminderAOI(dateTime,AOI)">
+                                                        </md-input-container>
+                                                        <md-input-container ng-hide ="AOI.hidedatepickerone !== 'hidedatepicker'">
+                                                            <input mdc-datetime-picker="" aria-label="datetimepicker" date="true" time="true" type="text"
+                                                            show-todays-date="" minutes="true" min-date="dateformdpickerinmeeting" show-icon="true"
+                                                            ng-model="dateTime" ng-change="updateReminderAOI(dateTime,AOI)">
+                                                        </md-input-container>
+                                                        <span class="rem">{{dateTime | date: "d MMM,y  hh:mm a "}}</span>
+                                                        <span class="rem" ng-show="dateTime == null">{{AOI.remindertime | date: "d MMM,y  hh:mm a "}}</span>
+                                                    </div>
+                                                </span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div><br>
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="meetadmin === youName && hideAOIsharebtn == null && disablereminderselect == true">
+                                    <span style="font-size: 10px;">Once you share the MOM you will not be able to edit the notes</span>
+                                    <button ng-click="shareAOI()" class="btn btn-success" ng-hide="actionofitemslist.length === 0">Share</button>
+                                    <button ng-click="shareAOIMail()" class="btn btn-success" ng-hide="actionofitemslist.length === 0">Share & Mail</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </md-tab>
+                <md-tab label="Create Notes">
+                   <div class="container-fluid">
+                      <br>
+                       <div class="row" style="font-size: 15px;color: rgba(39,49,66,0.6)">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                <form name="sharewithmeform" ng-hide="hidesharewithmeeditor == 'hidesharewithmeeditor'">
+                                    <div>
+                                        <md-input-container class="md-block">
+                                            <textarea class="froalaeditortome" aria-label="createnotesforme" name="createnotesforme" ng-model="createnotesforme" required></textarea>
+                                        </md-input-container>
+                                    </div>
+                                    <button class="btn btn-success" ng-disabled="sharewithmeform.$invalid" ng-click="saveNotes();">
+                                        Save
+                                    </button>
+                                </form>
+                                <div ng-show="hidesharewithmeeditor == 'hidesharewithmeeditor'" id="momtomefilepreview" ng-bind-html="momtomefilepreview"></div>
+                            </div>
+                        </div>
+                   </div>
+                </md-tab>
+                <md-tab label="Remainder">
+                   <div class="Container-fluid">
+                       <div class="row" ng-show="defaultreminder == 10">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                <h4>Default Remindertime: Before {{defaultreminder}} Minutes form {{date}}, {{time}}</h4>
+                                <p>If you would like to change the reminder time click the below select box and choose the time</p>
+                            </div>
+                       </div>
+                        <div class="row">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                <md-input-container>
+                                    <label ng-hide="reminder !== null">-{{reminder}}-</label>
+                                    <md-select id="reshma" ng-model="reminder" aria-labelledby="reminder" ng-disabled="disablereminderselect">
+                                        <md-optgroup label="Set Time">
+                                        <md-option ng-if="timeDiff >= rt.convertedintominutes" ng-repeat="rt in reminderTime" ng-click="setReminder(rt.displaytime)" ng-value="rt">{{rt.displaytime}}</md-option>
+                                        </md-optgroup>
+                                    </md-select>
+                                </md-input-container>
+                            </div>
+                        </div>
+                        <div class="row" ng-hide="defaultreminder == 10">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                <span>Remainder: {{selectedremindertime | date :'MMM d, y h:mm a'}}</span>
+                            </div>
+                        </div>
+                   </div>
+                </md-tab>
+            </md-tabs>
+        </div> 
+
+        <!-- end of meeting details div -->
+
+        <!-- leave letter creation div -->
+
+        <div class="col-lg-7 col-md-7 col-sm-6 col-xs-12 meeting-details" ng-show="showgroupinput === 'createleaveletter'">
+            <div class="row" style="margin-top:0px;">
+                <div class="col-lg-12 col-md-12 col-sm-12 info" layout="row">
+                    <md-button class="visible-xs md-icon-button fa fa-long-arrow-left" aria-label="backbutton" ng-click="ctrl = 'leaveletter'; showgroupinput = null"></md-button>                    
+                    <div class="unames">Apply Your Leave</div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="background: #FFFEFB;">
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 col-sm-12">
+                            <md-tabs md-dynamic-height="" md-border-bottom="">
+                                <md-tab label="Apply Leave For Hours">
+                                    <form name="hoursform" style="margin-top:30px;">
+                                        <div>
+                                            <div style= "color: rgba(39,49,66,0.7);">To</div>
+                                            <select class="meetmembers" multiple="multiple" style="width:60%;" id="h" ng-model="hleaveto" required>
+                                                <option ng-repeat="user in leaveusers" value="{{user.uname}}" ng-if="user.uname !== youName">
+                                                    {{user.uname}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <br>
+                                        <div>
+                                            <md-input-container class="md-block">
+                                                <label>Subject</label>
+                                                <textarea rows="1" name="hsubject" ng-model="hsubject" required></textarea>
+                                                <div ng-messages="hoursform.hsubject.$error">
+                                                    <div ng-message="required">This is required.</div>
+                                                </div>
+                                            </md-input-container>
+                                        </div>
+                                        <br>
+                                        <div>
+                                            <md-input-container class="md-block">
+                                                <label>Reason</label>
+                                                <textarea id="hourseditor" name="hreasonforleave" aria-label="hreasonforleave" class="froalaeditorforhleave" ng-model="hreasonforleave" required></textarea>
+                                                <div ng-messages="hoursform.hreasonforleave.$error">
+                                                    <div ng-message="required">This is required.</div>
+                                                </div>
+                                            </md-input-container>
+                                        </div>
+                                    
+                                        <div>
+                                            <md-input-container>
+                                                <label>Select Hours</label>
+                                                <md-select name="selectedhours" ng-model="selectedhours" aria-label="selectedhours" required>
+                                                    <md-optgroup label="Select Hours">
+                                                    <md-option ng-repeat="hour in lhours" ng-click="selectedHours(hour)" ng-value="hour" class="btnlog">{{hour}}</md-option>
+                                                    </md-optgroup>
+                                                </md-select>
+                                                <div ng-messages="hoursform.selectedhours.$error">
+                                                    <div ng-message="required">This is required.</div>
+                                                </div>
+                                            </md-input-container>
+                                        </div>
+                                        <br>
+                                        
+                                        <div style="margin-top:20px;">
+                                            <button id="searchclearhours" type="button" class="btn btn-success" ng-disabled="hoursform.$invalid" ng-click='hleaveLetterData(hoursform,hleaveto,hsubject,selectedhours);'>Save</button>
+                                        </div>
+                                    </form>
+                                </md-tab>
+                                <md-tab label="Apply Leave For Days">
+                                    <form name="daysform" style="margin-top:30px;">
+                                        <div>
+                                            <div style= "color: rgba(39,49,66,0.7);">To</div>
+                                            <select class="meetmembers" multiple="multiple" id="d" style="width:60%;" ng-model="dleaveto" required>
+                                                <option ng-repeat="user in leaveusers" value="{{user.uname}}" ng-if="user.uname !== youName">
+                                                    {{user.uname}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <br>
+                                        <div>
+                                            <md-input-container class="md-block">
+                                                <label>Subject</label>
+                                                <textarea rows="1" name="dsubject" ng-model="dsubject" required></textarea>
+                                                <div ng-messages="daysform.dsubject.$error">
+                                                    <div ng-message="required">This is required.</div>
+                                                </div>
+                                            </md-input-container>
+                                        </div>
+                                        <br>
+                                        <div>
+                                            <md-input-container class="md-block">
+                                                <textarea id="dayseditor" name="dreasonforleave" class="froalaeditorfordleave" aria-label="dayseditor" ng-model="dreasonforleave" required></textarea>
+                                                <div ng-messages="daysform.dreasonforleave.$error">
+                                                    <div ng-message="required">This is required.</div>
+                                                </div>
+                                            </md-input-container>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-lg-1"></div>
+                                            <div class="col-lg-1">From</div>
+                                            <div class="col-lg-1" style="margin-top: -8px; margin-left: -5px;">
+                                                <md-datepicker id="datepicker" ng-model="fromdate" md-min-date="mindate" md-placeholder="Enter date" md-open-on-focus required></md-datepicker>
+                                            </div>
+                                            <div class="col-lg-2">
+                                                <span>{{fromdate | date: "dd:MM:yyyy"}}</span>
+                                            </div>
+        
+                                            <div class="col-lg-2"></div>
+                                            <div class="col-lg-1">To</div>
+                                            <div class="col-lg-1" style="margin-top: -8px;">
+                                                <md-datepicker id="datepicker" ng-model="todate" md-min-date="mindate" md-placeholder="Enter date" md-open-on-focus required></md-datepicker>
+                                            </div>
+                                            <div class="col-lg-2">
+                                                <span>{{todate | date: "dd:MM:yyyy"}}</span>
+                                            </div>
+                                            <div class="col-lg-1"></div>
+                                        </div>
+                                        
+                                        <div style="margin-top:20px;">
+                                            <button id="searchcleardays" type="button" class="btn btn-success" ng-disabled="daysform.$invalid" ng-click='dleaveLetterData(daysform,dleaveto,dsubject,fromdate,todate);'>Save</button>
+                                        </div>
+                                    </form>
+                                </md-tab>
+                            </md-tabs>                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- leave letter creation end -->
+
+        <!-- leave letter data display -->
+
+        <div class="col-lg-7 col-md-7 col-sm-6 col-xs-12 meeting-details" ng-show="showgroupinput === 'leaves'" style="background: #FFFEFB; padding: 30px;font-size:14px;color: rgba(39,49,66,1)">
+            <md-button class="visible-xs md-icon-button fa fa-long-arrow-left" aria-label="backbutton" ng-click="ctrl = 'leaveletter'; showgroupinput = null"></md-button>
+            <div style="font-size: 17px;"><b>{{selectedfromname}}</b></div>
+            <div style="font-size: 13px; color: rgba(39,49,66,0.7);">{{selectedfromemail}}</div>
+            <div style="font-size: 13px; color: rgba(39,49,66,0.7);">{{selectedcurrentdate}}</div>
+            <hr style="border-top:2px solid #1f82dc">
+            <div>
+                <span style="border-bottom: 2px solid #D5D8DC; width: auto;padding-bottom: 10px;">
+                    <label>Subject:</label> {{selectedleavedata.subject}}
+                </span>
+            </div>
+            <br><br>
+            <div class="leavedetails">
+                <p ng-bind-html="selectedleavereason"></p>
+            </div>
+            <hr style="border-top:2px solid rgba(39,49,66,0.5);">
+            
+            <div style="font-size: 13px;">
+                <div style="color: rgb(39,49,66);font-size: 15px;"><b>Replys</b></div><br>
+                <div ng-repeat="reply in replys" ng-if="selectedleavedata.uniqueleavename == reply.uniqueleavename" ng-class="(reply.notification == 'unseen') ? 'unseen' : 'seen'">
+                    <span>
+                        <div ng-click="showReply(reply)" style="border-bottom: 1px solid rgba(39,49,66,0.2)">
+                            <img ng-src="/uploads/profileimages/{{reply.frompic}}" class="senderpic">
+                            {{reply.fromfname}}
+                            <span style="float: right; font-size: 10px; opacity: 0.5;">{{reply.rst}}</span>
+                        </div><br>
+                    </span>
+                    <div ng-show = "reply.show == 'yes'">
+                        <p style="font-size: 10px;">{{reply.fromemail}}</p>
+                        <div class="row">
+                            <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
+                            <div class="col-lg-11 col-md-11 col-sm-11 col-xs-11" style="font-size: 12px;" ng-bind-html="reply.replymessage"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- <hr style="border-top: 2px solid rgba(39,49,66,0.5)"> -->
+
+            <div>
+                <!-- <div style="color: rgb(39,49,66)"><b>Give Reply</b></div> -->
+                <br>
+                <div ng-show="selectedleavedata.fromuname == youName">
+                    <form name="replyformforaplicant">
+                        <div class="reply"> 
+                            <div style= "color: rgba(39,49,66,0.7);">To</div>
+                            <select id="r" class="meetmembers" style="width:60%;" ng-model="selectedreplymember" name="selectedreplymember" required>
+                                <option ng-repeat="leavemember in selectedleavemembers" value="{{leavemember.touname}}">
+                                    {{leavemember.touname}}
+                                </option>
+                            </select>
+                        </div>
+                        <div>
+                            <md-input-container class="md-block">
+                                <label>Reply</label>
+                                <textarea class="froalaeditorforreply" name="leavereply" ng-model="leavereply" required></textarea>
+                                <div ng-messages="replyformforaplicant.leavereply.$error">
+                                    <div ng-message="required">This is required.</div>
+                                </div>
+                            </md-input-container>
+                        </div>
+                        <div style="margin-top: -35px;">
+                            <button id="clearreplydata" class="btn btn-success" ng-disabled="replyformforaplicant.$invalid" ng-click="replyForLeaveAplicant(selectedreplymember)">Reply</button>
+                            <md-menu>
+                                <md-button ng-mouseenter="$mdOpenMenu()" aria-label="commenting"><img ng-src="../images/chat.png" alt="templates"></md-button>
+                                <md-menu-content ng-mouseleave="$mdCloseMenu()">
+                                    <md-menu-item ng-repeat="popleave in replyfromapplicant">
+                                        <md-button ng-click= "replyForLeaveAplicantDefult(selectedreplymember,popleave)">{{popleave}}</md-button>
+                                    </md-menu-item>
+                                </md-menu-content>
+                            </md-menu><br>
+                            <div style="color: #be1f22">{{leavepoperrormsg}}</div>
+                        </div>
+                    </form>
+                    
+                </div>
+                <div ng-hide="selectedleavedata.fromuname == youName">
+                    <form name="replyformforapprover">
+                        <div>
+                            <md-input-container class="md-block">
+                                <label>Reply</label>
+                                <textarea class="froalaeditorforreply" name="leavereply" ng-model="leavereply" required></textarea>
+                                <div ng-messages="replyformforapprover.leavereply.$error">
+                                    <div ng-message="required">This is required.</div>
+                                </div>
+                            </md-input-container>
+                        </div>
+                        <div style="margin-top: -35px;">
+                            <button class="btn btn-success" ng-disabled="replyformforapprover.$invalid" ng-click="replyForLeaveApprover(selectedleavedata)">Reply</button>
+                            <md-menu>
+                                <md-button ng-mouseenter="$mdOpenMenu()" aria-label="commenting"><img ng-src="../images/chat.png" alt="templates"></md-button>
+                                <md-menu-content ng-mouseleave="$mdCloseMenu()">
+                                    <md-menu-item ng-repeat="popleave in replyfromorgaziner">
+                                        <md-button ng-click= "replyForLeaveApproverDefult(selectedleavedata,popleave)">{{popleave}}</md-button>
+                                    </md-menu-item>
+                                </md-menu-content>
+                            </md-menu>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- leave letter data display end -->
+
+        <!-- call histroy data display -->
+
+        <div class="col-lg-7 col-md-7 col-sm-6 col-xs-12 meeting-details" ng-show="showgroupinput === 'histroy'" style="background: #FFFEFB; padding: 30px;font-size:14px;color: rgba(39,49,66,1)">
+            <span class="visible-xs fa fa-long-arrow-left" ng-click="ctrl = 'callhistroy'; showgroupinput = null"></span>
+            <div ng-show="calldata.callendtype  === '*/*/*Call Duration*/*/*'">
+                <div ng-show="calldata.calleruname === youName && calldata.callersticky !== 'null'">
+                    <h1>caller</h1>
+                    <div ng-bind-html= "calldata.callersticky"></div>
+                </div>
+                <div ng-show="calldata.calleeuname === youName && calldata.calleesticky !== 'null'">
+                    <h1>callee</h1> 
+                    <div ng-bind-html= "calldata.calleesticky"></div>  
+                </div>
+            </div>
+            <div ng-show="calldata.callendtype  !== '*/*/*Call Duration*/*/*'">
+                <h1>No Sticky Data</h1>
+            </div>
+        </div>
+
+        <!-- call histroy data display end -->
+
+        <!-- quote notification div -->
+
+        <div class="col-lg-7 col-md-7 col-sm-6 col-xs-12 meeting-details" ng-show="showgroupinput === 'quotes'" style="background: #FFFEFB;font-size:14px;color: rgba(39,49,66,1)">
+            <md-tabs md-dynamic-height="" md-border-bottom="" drop-on-me>
+                <md-tab label="General Quotes">
+                    <div style="overflow-y: auto;height: 80vh;overflow-x: hidden;">
+                        <center>
+                            <div ng-hide="tomsuccessmsg == null" class="alert alert-success">
+                                <b>{{tomsuccessmsg}}</b>
+                            </div>
+                            <div ng-hide="tomerrormsg == null" class="alert alert-danger">
+                                <b>{{tomerrormsg}}</b>
+                            </div>
+                            <form name="quotesform">
+                                <md-input-container class="mic">
+                                    <input  name="quote" aria-label="quote" type="text" ng-model="quote" placeholder="Post Your Quote" autofocus required >
+                                </md-input-container>
+                                <button class="btn btn-success" ng-disabled="quotesform.$invalid"  ng-click="postQuote(quotesform,quote,you,youName,profilePic)" style="margin-top: -20px;">Post</button>
+                            </form>
+                        </center>
+                    </div>
+                </md-tab>
+                <md-tab label="Information Sharing" ng-click="clearquote();" >
+                    <div style="overflow-y: auto;height: 80vh;overflow-x: hidden;">
+                        <center>
+                            <form name="infromationform">
+                                <md-input-container class="mic">
+                                    <input  name="information" aria-label="information" type="text" ng-model="information" placeholder="Share Information To All" autofocus required >
+                                </md-input-container>
+                                <button class="btn btn-success" ng-disabled="infromationform.$invalid"  ng-click="shareInformation(infromationform,information,you,youName,profilePic)" style="margin-top: -20px;">Post</button>
+                            </form>
+                            <br><br><br>
+                            <div  ng-repeat="x in info |orderBy : '-date'">
+                                <div class="alert alert-info"  style="padding-bottom:20px;border-style: solid;border-color: #1f82dc" ng-show="x.postedby !== youName"  >
+                                    <h4><strong>{{x.information}}</strong></h4>
+                                    <div style="float:right"><img ng-src="/uploads/profileimages/{{x.userimage}}" style="width:20px;height:20px;border-radius:50%">
+                                        <span ng-show="x.postedby !== youName">{{x.name}}&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp{{x.date}}</span>
+                                    </div>
+                                </div>
+                                <div class="alert alert-success"  style="padding-bottom:20px;border-style: solid;border-color: #3CE61C" ng-show="x.postedby == youName" >
+                                    <h4><strong>{{x.information}}</strong></h4>
+                                    <div style="float:right"><img ng-src="/uploads/profileimages/{{x.userimage}}" style="width:20px;height:20px;border-radius:50%">
+                                        <span ng-show="x.postedby == youName">You &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp{{x.date}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </center>
+                    </div>
+                </md-tab>
+            </md-tabs>
+        </div>
+
+        <!-- quote notification div end -->
+
+    </div>
+    
+    <!-- End Of Main Row -->
+
+    <!-- download modal -->
+    <div class="modal fade" id="downloadModal" role="dialog" style="padding-top:100px;">
+        <div class="modal-dialog modal-md mcard">
+            <md-content style="padding: 20px; text-align: left; font-size: 16px;"> 
+                <div>Accept Files Only From People You Trust</div><br>
+                <div>Do You Want To Accept This File From {{acceptfromuser}}</div><br>
+                <div>
+                    <md-checkbox ng-model="alwaysaccept" ng-true-value="'YES'" ng-false-value="'NO'" aria-label="Checkbox"></md-checkbox> Do Not Ask Again
+                </div><br>
+                <md-button ng-href="/uploads/attachments/{{acceptfile}}" target="_self" download ng-click="closeAcceptFileModal(alwaysaccept)">
+                    Download
+                </md-button> 
+                <md-button data-dismiss="modal">
+                    Cancle
+                </md-button>
+            </md-content>
+        </div>
+    </div>
+
+    <!-- share files modal -->
+
+    <div class="modal fade" id="sharefile" role="dialog" style="padding-top:100px;">
+        <form name="sharefileswith">
+            <div class="modal-dialog modal-md mcard" style="padding: 30px;">
+                <div style="margin-top:-20px; margin-right: -20px;">
+                    <button class="btn" style="float: right; background: #FFFEFB; " ng-init="selectedShareFileData = null" data-dismiss="modal">X</button>
+                </div><br><br>
+                <div style="color: #1f82dc">Share With</div>
+                <div>
+                    <select class="meetmembers" multiple="multiple" style="width:auto" id="s" ng-model="sharetothisusers" required>
+                        <option ng-repeat="s in shareusers | orderBy : 'fname'" value="{{s.uname}}" ng-if="s.uname !== youName">
+                            {{s.uname}}
+                        </option>
+                    </select>
+                </div>
+                
+                <div class="unselect" style="margin-top: 20px;">
+                    <button class="btn btn-success" id="multipleshare" ng-disabled="sharefileswith.$invalid" ng-hide="multipleshare === null" ng-click="shareMultipleFilesToMultipleUsers(multipleSelectedFiles, sharetothisusers)">Share</button>
+                    <button class="btn btn-success" id="share" ng-show="multipleshare === null" ng-disabled="sharefileswith.$invalid" ng-click="shareToUsers(sharetothisusers)">Share</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- share files modal end -->
+
+    <!-- video call modal to initiator -->
+
+    <div class="modal fade" id="startvideocall" role="dialog" style="padding-top:100px;">
+        <div class="modal-dialog modal-md mcard" style="padding: 30px; color: white; background: rgb(39,49,66);">
+            <div>{{notavailableerror}}</div><br>
+            <div>Ringing....</div><br>
+            <div style="text-transform: capitalize;">You Are Calling To {{calleename}}</div><br>
+            <div>
+                <button class="btn btn-danger" data-dismiss="modal" ng-click="endCallByCaller()">End</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- video call modal to initiator end -->
+
+    <!-- video call modal to accept or reject -->
+
+
+    <div class="modal fade" id="videocall" role="dialog" style="padding-top:100px;">
+        <div class="modal-dialog modal-md mcard" style="padding: 30px; color: white; background: rgb(39,49,66);">
+            <div>Waiting....</div><br>
+            <div style="text-transform: capitalize;">{{callername}} Is Calling You</div>
+            <br>
+            <div>
+                <button class="btn btn-success" ng-click="acceptCall()">Accept</button>
+                <button class="btn btn-danger" data-dismiss="modal" ng-click="rejectCall()">Reject</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- video call modal to accept or reject modal end -->
+
+    <!-- sidenav code start -->
+
+    <md-sidenav class="md-sidenav-right" md-component-id="right" style="overflow-y: auto;">
+        <div ng-click="closeSidenav()" style="outline: none; background: transparent; border: none; color: #1f82dc; padding: 15px;">X</div>
+        <div ng-show="sidenav == 'profilenav'">
+            <img ng-src="/uploads/profileimages/{{selectedUserPic}}" style="width:100%; height: auto; padding: 5px;">
+            <div style="padding: 20px;">
+                <h3>{{selectedUserFname}} {{selectedUserLname}}</h3><br>
+                <div><label class="fa fa-phone" style="padding-right: 10px; color: #1f82dc;"></label> {{selectedUserPhno}}</div>
+                <div><label class="fa fa-envelope" style="padding-right: 10px; color: #1f82dc;"></label> {{selectedUserEmail}}</div>
+            </div>
+        </div>
+        <div ng-show="sidenav == 'groupnav'">
+            <div>
+                <div class="imgoverlay">
+                    <img ng-src="/uploads/profileimages/{{groupimage}}" class="image" style="padding: 5px;">    
+                    <div class="middle" style="margin-left: 90px; font-size: 25px;">
+                        <span class="fileinput-button fa fa-camera">
+                            <input type="file" name="file" accept="image/*" file-model = "pregrouppic">
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div style="padding:15px;">
+                <div style="text-transform: capitalize;">
+                    <span style="float: left;">{{groupname}}</span><br>
+                    <span style="color: #3CE61C; float: left;">Administrator: </span><span style="float: left;">{{admin}}</span>
+                    <span ng-repeat="uname in memberUsernames">
+                        <span ng-show="uname === youName">
+                            <button class="btnlogout" ng-hide="uname === admin" style="float:right; border-color: #e62428;margin-top: -20px;" type="button" ng-click="leaveGroup(uniquegroupname,uname)">Leave Group</button><br>
+                            <button class="btnlogout" ng-show="uname === admin" style="float:right; border-color: #e62428;margin-top: -40px;" type="button" ng-click="adminToggle()">Leave Group</button><br>
+                            <button class="btnlogout"  ng-hide="admin !== youName" style="float:right; border-color: #e62428;margin-top: -30px;" type="button" ng-click="deletegroups(uniquegroupname);closeSidenav()">Delete Group</button>
+                        </span>
+                    </span>
+                    <br>
+                    <div ng-show="addAdmin">
+                        <div ng-hide="newadmin">Please Add admin To Group Before You exit</div>
+                        <select class="meetmembers" ng-model="newadmin" required>
+                            <option ng-repeat="member in memberUsernames" value="{{member}}" ng-if="member !== youName">
+                                {{member}}
+                            </option>
+                        </select>
+                        <br>
+                        <button class="btnlogout" ng-hide="!newadmin" ng-click="updateNewAdmin(admin,newadmin,uniquegroupname,groupname,memberUsernames);adminToggle()">Confirm</button>
+                        <button class="btnlogout" ng-click="adminToggle()">Cancel</button>
+                    </div>
+                    <br><br>
+                </div>
+                <button ng-click="showparticipants()" class="btnlogout" style="float: left; margin-top: -20px; border: 1px solid #3CE61C;" title="People In Group">
+                    <img ng-src="/uploads/profileimages/people.png" alt="memebers" style="height: 15px; width: 15px;">
+                </button>
+                <button ng-click="showAddMembers()" class="btnlogout" style="float: left; margin-top: -20px; border: 1px solid #3CE61C; margin-left: 5px;" title="Add Members To Group">
+                    <img ng-src="/uploads/profileimages/userplus.png" alt="memebers" style="height: 15px; width: 15px;">
+                </button>
+                <br>
+                <div ng-show="show == 'Show Participants'" style="height: 150px; overflow-y: auto;">
+                    <div ng-click="cancleShowParticipants()" style="float: right; color: red;font-size: 12px;">Cancle</div>
+                    <table class="table table-hover">
+                        <tr ng-repeat="uname in memberUsernames" ng-show="uname !== youName" ng-click="removeMember(uniquegroupname, uname)">
+                            <td>
+                                <span>{{uname}}</span>
+                            </td>
+                            <td>
+                                <span ng-hide=" youName !== admin" style="color: red" title="Remove From The Group">X</span>
+                            </td>
+                        </tr>
+                    </table>
+                    <div ng-show="memberUsernames.length === 1">
+                        Only You Exist in This Group.
+                    </div>
+                </div>
+                
+                <div ng-show="addpeople == 'addpeople'" style="height: 150px; overflow-y: auto;">
+                    <div ng-click="cancelshowAddMembers()" style="float: right;color: red;font-size: 12px;">Cancle</div> 
+                    <table class="table table-hover">
+                        <tr ng-repeat="c in child2" ng-click="addMemberToGroup(c.fname,c.uname,c.image)">
+                            <td>{{c.fname}}</td>
+                            <td>
+                                <span style="color: #3CE61C;font-size: 20px;">+</span>
+                            </td>
+                        </tr>
+                    </table>
+                    <div ng-show="child2.length == 0">
+                        No Members To Add
+                    </div>
+                </div>
+            </div>
+        </div>
+    </md-sidenav>
+
+    <!-- sidenav code end -->
+
+    <!-- sidenav for menu -->
+
+    <md-sidenav class="md-sidenav-left menu visible-xs" md-component-id="left" style="top: 40px;min-width: 170px !important;width: 5vw !important;max-width: 200px !important;">
+        <ul style="padding-left: 3vw;padding-top: 3vw;list-style:none;" id="myDIV1">
+            <li>
+                <button class="btnn active1"  ng-click="userlist();">
+                    <span class="fa fa-home"></span>
+                    Home
+                </button>
+            </li><br>
+            <li>
+                <button class="btnn" ng-click="pro();">
+                    <span class="fa fa-user-o"></span> 
+                    Profile
+                </button>
+            </li><br>
+            <li>
+                <button class="btnn" ng-click="addgroup();">
+                    <span class="fa fa-group"></span>
+                    Create Group
+                </button>
+            </li><br>
+            <li>
+                <button class="btnn" ng-click="meeting();">
+                    <span class="fa fa-handshake-o"></span>
+                    Meetings
+                </button>
+                <span style="background: red; color: #FFFEFB; font-size: 9px; border-radius: 50%;" class="label">{{newmeetingnotifications}}</span>
+            </li><br>
+            <li>
+                <button class="btnn" ng-click="sharefiles();">
+                    <span class="fa fa-folder-open-o"></span>
+                    Share Files
+                </button>
+                <span style="background: red; color: #FFFEFB; font-size: 9px; border-radius: 50%;" class="label">{{sharefilenotifications}}</span>
+            </li><br>
+            <li>
+                <button class="btnn" ng-click="leaveLetter();">
+                    <span class="fa fa-envelope-o"></span>
+                    Leaves
+                </button>
+                <span style="background: red; color: #FFFEFB; font-size: 9px; border-radius: 50%;" class="label">{{leaveletternotifications}}</span>
+            </li><br>
+            <li>
+                <button class="btnn" ng-click="callHistroy();">
+                    <span class="fa fa-history"></span>
+                    Call Histroy
+                </button>
+            </li><br>
+            <li>
+                <button class="btnn" ng-click="quotes();">
+                    <span class="fa fa-quote-left"></span>
+                    Quotes
+                </button>
+            </li><br>
+            <li>
+                <button class="btnn" ng-click="Settings();">
+                    <span class="fa fa-cog"></span>
+                    Settings
+                </button>
+            </li><br>
+        </ul>
+    </md-sidenav>
+
+    <!-- sidenav for menu end -->
+
+</div> <!-- End of Container-fluid -->
