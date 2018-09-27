@@ -183,10 +183,10 @@ app.use('/users', users);
 
 //mySQL connection
 var db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'lokesh',
-  database: 'chat_application'
+  host     : process.env.RDS_HOSTNAME,
+  user     : process.env.RDS_USERNAME,
+  password : process.env.RDS_PASSWORD,
+  port     : process.env.RDS_PORT
 });
 
 // db.query("CREATE DATABASE IF NOT EXISTS chat_application");
