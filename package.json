@@ -7,7 +7,7 @@
     "npm": "6.1.0"
   },
   "scripts": {
-    "start": "node app.js"
+    "start": "node ./bin/www"
   },
   "dependencies": {
     "angular-ui-notification": "^0.3.6",
